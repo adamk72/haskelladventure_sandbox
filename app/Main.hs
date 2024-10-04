@@ -11,7 +11,8 @@ import CmdOptions
 -- import TextReflow
 
 -- import DummyAdventure
-
+greet :: AdventureOptions -> IO ()
+greet (AdventureOptions a ) = putStrLn $ "You chose: '" ++ a ++ "'." 
 
 main :: IO ()
 main = greet =<< parse

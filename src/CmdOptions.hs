@@ -1,28 +1,24 @@
-module CmdOptions (parse, greet) where
+module CmdOptions (parse, AdventureOptions(AdventureOptions)) where
 
 import Options.Applicative
 
 data AdventureOptions = AdventureOptions String
-  -- { hello      :: String
-  -- , quiet      :: Bool
-  -- , enthusiasm :: Int }
+  -- { adventure      :: String }
 
-adventure :: Parser AdventureOptions
-adventure = AdventureOptions
+choice :: Parser AdventureOptions
+choice = AdventureOptions
       <$> strOption
           ( long "adventure"
           <> short 'a'
           <> metavar "NAME"
           <> help "Name of adventure to load." )
 
-greet :: AdventureOptions -> IO ()
-greet (AdventureOptions a ) = putStrLn $ "You chose: '" ++ a ++ "'." 
 
 parse :: IO AdventureOptions
 parse = execParser opts
 
 opts :: ParserInfo AdventureOptions
-opts = info (adventure <**> helper)
+opts = info (choice <**> helper)
       ( fullDesc
       <> progDesc "Run the named text adventure."
       <> header "Haskell Adventure - a journey into fun!" )
