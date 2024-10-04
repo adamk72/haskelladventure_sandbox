@@ -1,56 +1,77 @@
-cabal-version:      3.0
-name:               TextAdventure
-version:            0.1.0.0
--- synopsis:
--- description:
-license:            BSD-3-Clause
-license-file:       LICENSE
-author:             Adam Kecskes
-maintainer:         adam@kecskes.net
--- copyright:
-build-type:         Simple
-extra-doc-files:    CHANGELOG.md
--- extra-source-files:
+cabal-version: 2.2
 
-common warnings
-    ghc-options: -Wall
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           TextAdventure
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/TextAdventure#readme>
+homepage:       https://github.com/githubuser/TextAdventure#readme
+bug-reports:    https://github.com/githubuser/TextAdventure/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2024 Author name here
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/TextAdventure
 
 library
-    import:           warnings
-    exposed-modules:
-        NarrativeGraph,
-        NaturalLanguageParser, 
-        PrintUtils,
-        TextReflow,
-        DummyAdventure,
-    -- other-modules:
-    -- other-extensions:
-    build-depends:    base ^>=4.17.2.1,
-        split,
-        containers,
-        text,
-    hs-source-dirs:   src
-    default-language: Haskell2010
+  exposed-modules:
+      DummyAdventure
+      NarrativeGraph
+      NaturalLanguageLexer
+      NaturalLanguageParser
+      NightmareAdventure
+      PrintUtils
+      TextReflow
+  other-modules:
+      Paths_TextAdventure
+  autogen-modules:
+      Paths_TextAdventure
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , split
+    , text
+  default-language: Haskell2010
 
-executable TextAdventure
-    import:           warnings
-    main-is:          Main.hs
-    -- other-modules:
-    -- other-extensions:
-    build-depends:
-        base ^>=4.17.2.1,
-        TextAdventure,
-    hs-source-dirs:   app
-    default-language: Haskell2010
+executable TextAdventure-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_TextAdventure
+  autogen-modules:
+      Paths_TextAdventure
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      TextAdventure
+    , base >=4.7 && <5
+  default-language: Haskell2010
 
 test-suite TextAdventure-test
-    import:           warnings
-    default-language: Haskell2010
-    -- other-modules:
-    -- other-extensions:
-    type:             exitcode-stdio-1.0
-    hs-source-dirs:   test
-    main-is:          Main.hs
-    build-depends:
-        base ^>=4.17.2.1,
-        TextAdventure
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Main
+      Paths_TextAdventure
+  autogen-modules:
+      Paths_TextAdventure
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      TextAdventure
+    , base >=4.7 && <5
+  default-language: Haskell2010
