@@ -5,6 +5,7 @@
 module DummyAdventure (gameIntro, allVerbs, allNouns, allPrepositions, allTokens, startScene, startInventory, startFlags, defaultScene, allScenes) where
 
 import qualified Data.List
+import Data.Map
 
 import NaturalLanguageLexer
 import NaturalLanguageParser
@@ -385,7 +386,7 @@ scene0 =
                             {
                                 condition = FlagSet "opened white door", --The white door is opened
                                 conditionalDescription = ConditionalDescription [(CTrue, "You walk through the <white door>. Congratulations, you escaped the green room!", [])],
-                                stateChanges = [SceneChange 1]
+                                stateChanges = [SceneChange "scene1"]
                             },
                             ConditionalAction
                             {
@@ -404,7 +405,7 @@ scene0 =
                             {
                                 condition = FlagSet "opened white door", --The white door is opened
                                 conditionalDescription = ConditionalDescription [(CTrue, "You dash through the <white door>. Congratulations, you escaped the green room!", [])],
-                                stateChanges = [SceneChange 1]
+                                stateChanges = [SceneChange "scene1"]
                             },
                             ConditionalAction
                             {

@@ -12,7 +12,8 @@ import TextReflow
 import NaturalLanguageLexer
 import NaturalLanguageParser
 import NarrativeGraph
-import NightmareAdventure
+-- import NightmareAdventure
+import DummyAdventure
 
 allDelimiters :: [Char]
 allDelimiters = [' ', '\t']
