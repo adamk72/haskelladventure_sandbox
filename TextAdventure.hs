@@ -19,7 +19,7 @@ allDelimiters :: [Char]
 allDelimiters = [' ', '\t']
 
 allColumnWidth :: Int
-allColumnWidth = 75
+allColumnWidth = 120
 
 printTokens :: String -> [Token] -> IO ()
 printTokens word [] = return () >> putStr "\n" >> hFlush stdout

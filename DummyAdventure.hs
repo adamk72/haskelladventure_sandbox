@@ -176,7 +176,7 @@ scene0 =
                             ConditionalAction
                             {
                                 condition = (CNot (FlagSet "unlocked white door")) `CAnd` (InInventory "key"), --The white door is locked and the player has a key
-                                conditionalDescription = ConditionalDescription [(CTrue, "You unlock the <white door> with your <key>.", [])],
+                                conditionalDescription = ConditionalDescription [(CTrue, "You unlock the <white door> with your <key> open it.", [])],
                                 stateChanges = [SetFlag "unlocked white door", SetFlag "opened white door"]
                             },
                             ConditionalAction
