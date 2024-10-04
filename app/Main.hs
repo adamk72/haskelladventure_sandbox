@@ -3,7 +3,6 @@
 --Text adventure executable
 
 import System.IO
-import System.Exit
 
 import NarrativeGraph
 import NaturalLanguageParser
