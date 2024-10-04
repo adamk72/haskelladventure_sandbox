@@ -39,6 +39,7 @@ library:
   - split
   - containers
   - text
+  - optparse-applicative
 
 executables:
   TextAdventure-exe:
