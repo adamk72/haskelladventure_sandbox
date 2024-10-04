@@ -4,7 +4,7 @@
 
 import System.IO
 
-import NarrativeGraph
+import NarrativeGraph hiding (sentences, endScenes)
 import NaturalLanguageParser
 import PrintUtils
 import TextReflow
@@ -34,6 +34,7 @@ adventure narrativeGraph (Just (sceneKey, inventory, flags))
     = printSceneDescription allDelimiters allColumnWidth narrativeGraph (Just (sceneKey, inventory, flags)) >>=
       updateAdventure narrativeGraph
 
+main :: IO ()
 main = printIntro >>
        reflowPutStr allDelimiters allColumnWidth gameIntro >>
        putStr "\n" >>
