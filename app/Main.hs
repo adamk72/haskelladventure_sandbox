@@ -13,7 +13,7 @@ import CmdOptions
 -- import DummyAdventure
 main :: IO ()
 -- main =  (greet =<< parse) >> putStrLn "And a test"
-main = (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") =<< parse "a"
+main =  readFile "stories.txt" >>= (\a -> parse a) >>= (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") 
 
 -- main = printIntro >>
 --        reflowPutStr allDelimiters allColumnWidth gameIntro >>

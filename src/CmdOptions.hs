@@ -23,5 +23,6 @@ opts :: String -> ParserInfo AdventureOptions
 opts s = info (choice <**> versionOption s <**> helper)
       ( fullDesc
       <> progDesc "Run the named text adventure."
-      <> header "Haskell Adventure - a journey into fun!" )
+      <> header "Haskell Adventure - a journey into fun!"
+      )
 
