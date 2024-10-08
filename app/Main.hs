@@ -16,8 +16,7 @@ import CmdOptions
 
 main :: IO ()
 -- main =  (greet =<< parse) >> putStrLn "And a test"
-main = (\x -> case x of
-                AdventureOptions a -> putStrLn $ "You chose: '" ++ a ++ "'.") =<< parse
+main = (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") =<< parse
 
 -- main = printIntro >>
 --        reflowPutStr allDelimiters allColumnWidth gameIntro >>
