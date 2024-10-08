@@ -40,6 +40,8 @@ library:
   - containers
   - text
   - optparse-applicative
+  - prettyprinter
+  - prettyprinter-ansi-terminal
 
 executables:
   TextAdventure-exe:
@@ -50,7 +52,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - TextAdventure
+    - TextAdventure 
+    - ansi-terminal
 
 tests:
   TextAdventure-test:

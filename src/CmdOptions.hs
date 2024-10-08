@@ -1,5 +1,7 @@
+{-# LANGUAGE OverloadedStrings #-}
 module CmdOptions (parse, AdventureOptions(AdventureOptions)) where
 
+import Prettyprinter
 import Options.Applicative
 
 newtype AdventureOptions = AdventureOptions String
@@ -24,5 +26,6 @@ opts s = info (choice <**> versionOption s <**> helper)
       ( fullDesc
       <> progDesc "Run the named text adventure."
       <> header "Haskell Adventure - a journey into fun!"
+      <> (progDescDoc . Just $ indent 2 $ vsep [pretty s])
       )
 

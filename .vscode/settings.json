@@ -5,7 +5,9 @@
     "githubuser",
     "metavar",
     "optparse",
+    "prettyprinter",
     "rtsopts",
-    "Strs"
+    "Strs",
+    "vcat"
   ]
 }
