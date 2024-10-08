@@ -4,7 +4,6 @@
 
 module DummyAdventure (gameIntro, allVerbs, allNouns, allPrepositions, allTokens, startScene, startInventory, startFlags, defaultScene, allScenes) where
 
-import qualified Data.List
 import Data.Map
 
 import NaturalLanguageLexer
@@ -118,7 +117,7 @@ allPrepositions =
 
 --Helper function to make unambiguous sentences
 uSentence :: [String] -> Sentence
-uSentence words = unambiguousSentence allVerbs allNouns allPrepositions words
+uSentence = unambiguousSentence allVerbs allNouns allPrepositions
 
 allTokens :: [Token]
 allTokens = allNouns ++ allVerbs ++ allPrepositions
@@ -175,7 +174,7 @@ scene0 =
                             },
                             ConditionalAction
                             {
-                                condition = (CNot (FlagSet "unlocked white door")) `CAnd` (InInventory "key"), --The white door is locked and the player has a key
+                                condition = CNot (FlagSet "unlocked white door") `CAnd` InInventory "key", --The white door is locked and the player has a key
                                 conditionalDescription = ConditionalDescription [(CTrue, "You unlock the <white door> with your <key> open it.", [])],
                                 stateChanges = [SetFlag "unlocked white door", SetFlag "opened white door"]
                             },
@@ -187,7 +186,7 @@ scene0 =
                             },
                             ConditionalAction
                             {
-                                condition = (CNot (FlagSet "unlocked white door")) `CAnd` (CNot (InInventory "key")), --The white door is locked player and the player doesn't have a key
+                                condition = CNot (FlagSet "unlocked white door") `CAnd` CNot (InInventory "key"), --The white door is locked player and the player doesn't have a key
                                 conditionalDescription = ConditionalDescription [(CTrue, "The <white door> is locked.", [])],
                                 stateChanges = []
                             }
@@ -276,7 +275,7 @@ scene0 =
                             },
                             ConditionalAction
                             {
-                                condition = (FlagSet "unlocked white door"), --The player has a key and the door is unlocked
+                                condition = FlagSet "unlocked white door", --The player has a key and the door is unlocked
                                 conditionalDescription = ConditionalDescription [(CTrue, "You lock the <white door> with your <key>.", [])],
                                 stateChanges = [RemoveFlag "unlocked white door"]
                             }
@@ -293,7 +292,7 @@ scene0 =
                         [
                             ConditionalAction
                             {
-                                condition = (FlagSet "unlocked white door") `CAnd` (InInventory "key"), --Player has a key and the white door is unlocked
+                                condition = FlagSet "unlocked white door" `CAnd` InInventory "key", --Player has a key and the white door is unlocked
                                 conditionalDescription = ConditionalDescription [(CTrue, "You lock the <white door> with your <key>.", [])],
                                 stateChanges = [RemoveFlag "unlocked white door"]
                             },
@@ -322,13 +321,13 @@ scene0 =
                         [
                             ConditionalAction
                             {
-                                condition = (CNot (FlagSet "unlocked white door")) `CAnd` (InInventory "key"), --Player has a key and the white door is locked
+                                condition = CNot (FlagSet "unlocked white door") `CAnd` InInventory "key", --Player has a key and the white door is locked
                                 conditionalDescription = ConditionalDescription [(CTrue, "You unlock the <white door> with your <key>.", [])],
                                 stateChanges = [SetFlag "unlocked white door"]
                             },
                             ConditionalAction
                             {
-                                condition = (FlagSet "unlocked white door"), --The door is already unlocked
+                                condition = FlagSet "unlocked white door", --The door is already unlocked
                                 conditionalDescription = ConditionalDescription [(CTrue, "The <white door> is already unlocked.", [])],
                                 stateChanges = [SetFlag "unlocked white door"]
                             },
@@ -347,13 +346,13 @@ scene0 =
                         [
                             ConditionalAction
                             {
-                                condition = (CNot (FlagSet "unlocked white door")) `CAnd` (InInventory "key"), --Player has a key and the white door is locked
+                                condition = CNot (FlagSet "unlocked white door") `CAnd` InInventory "key", --Player has a key and the white door is locked
                                 conditionalDescription = ConditionalDescription [(CTrue, "You unlock the <white door> with the <key> and open it.", [])],
                                 stateChanges = [SetFlag "unlocked white door", SetFlag "opened white door"]
                             },
                             ConditionalAction
                             {
-                                condition = (CNot (FlagSet "opened white door")) `CAnd` (FlagSet "unlocked white door"), --Player has a key and the white door is locked
+                                condition = CNot (FlagSet "opened white door") `CAnd` FlagSet "unlocked white door", --Player has a key and the white door is locked
                                 conditionalDescription = ConditionalDescription [(CTrue, "You open the <white door>.", [])],
                                 stateChanges = [SetFlag "opened white door"]
                             },
