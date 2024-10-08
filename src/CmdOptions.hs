@@ -16,11 +16,11 @@ choice = AdventureOptions
 versionOption :: String ->  Parser (a -> a)
 versionOption s = infoOption s (long "version" <> help "Show version")
 
-parse :: IO AdventureOptions
-parse = execParser opts
+parse :: String -> IO AdventureOptions
+parse = execParser . opts
 
-opts :: ParserInfo AdventureOptions
-opts = info (choice <**> versionOption "1" <**> helper)
+opts :: String -> ParserInfo AdventureOptions
+opts s = info (choice <**> versionOption s <**> helper)
       ( fullDesc
       <> progDesc "Run the named text adventure."
       <> header "Haskell Adventure - a journey into fun!" )

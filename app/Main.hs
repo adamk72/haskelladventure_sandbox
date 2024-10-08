@@ -11,12 +11,9 @@ import CmdOptions
 -- import TextReflow
 
 -- import DummyAdventure
--- greet :: AdventureOptions -> IO ()
--- greet (AdventureOptions a ) = putStrLn $ "You chose: '" ++ a ++ "'." 
-
 main :: IO ()
 -- main =  (greet =<< parse) >> putStrLn "And a test"
-main = (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") =<< parse
+main = (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") =<< parse "a"
 
 -- main = printIntro >>
 --        reflowPutStr allDelimiters allColumnWidth gameIntro >>
