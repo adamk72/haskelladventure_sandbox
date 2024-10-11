@@ -1,4 +1,4 @@
-module TextAdventureCore (doAdventureLoop, updateAdventure) where
+module TextAdventureCore (doAdventureLoop, updateAdventure, adventure) where
 
 import           System.IO             (hFlush, stdout)
 
