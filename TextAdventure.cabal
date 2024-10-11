@@ -64,6 +64,7 @@ executable TextAdventure-exe
       TextAdventure
     , ansi-terminal
     , base >=4.7 && <5
+    , containers
   default-language: Haskell2010
 
 test-suite TextAdventure-test

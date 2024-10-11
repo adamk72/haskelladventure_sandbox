@@ -54,6 +54,8 @@ executables:
     dependencies:
     - TextAdventure 
     - ansi-terminal
+    - containers
+
 
 tests:
   TextAdventure-test:
