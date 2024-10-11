@@ -21,15 +21,16 @@ import           System.Environment as E
 
 main :: IO ()
 main =
-    readFile "stories.txt" >>= parse >>=
-    (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") >>
     -- E.getArgs >>= print >>
     E.getArgs >>= \case
         ["-a", "Dummy Adventure"]       -> runDummy
         ["-a", "Dummy"]                 -> runDummy
         ["-a", "Nightmare Adventure"]   -> runDummy
         ["-a", "Nightmare"]             -> runDummy
-        _                               -> putStrLn "I don't know what the adventure is. Please try again."
+        _                               -> displayHelp
+
+displayHelp :: IO ()
+displayHelp = readFile "stories.txt" >>= parse >>= mempty
 
 runDummy :: IO ()
 runDummy =
