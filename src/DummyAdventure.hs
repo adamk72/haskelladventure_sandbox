@@ -133,7 +133,7 @@ allTokens :: [Token]
 allTokens = allNouns ++ allVerbs ++ allPrepositions
 
 startScene :: String
-startScene = "scene0"
+startScene = "openingScene"
 
 startInventory :: Inventory
 startInventory = Inventory ["fork"]
@@ -141,8 +141,8 @@ startInventory = Inventory ["fork"]
 startFlags :: Flags
 startFlags = Flags ["started game"]
 
-scene0 :: Scene
-scene0 =
+openingScene :: Scene
+openingScene =
     Scene
     {
         sceneDescription =
@@ -395,7 +395,7 @@ scene0 =
                             {
                                 condition = FlagSet "opened white door", --The white door is opened
                                 conditionalDescription = ConditionalDescription [(CTrue, "You walk through the <white door>. Congratulations, you escaped the green room!", [])],
-                                stateChanges = [SceneChange "scene1"]
+                                stateChanges = [SceneChange "endScene"]
                             },
                             ConditionalAction
                             {
@@ -414,7 +414,7 @@ scene0 =
                             {
                                 condition = FlagSet "opened white door", --The white door is opened
                                 conditionalDescription = ConditionalDescription [(CTrue, "You dash through the <white door>. Congratulations, you escaped the green room!", [])],
-                                stateChanges = [SceneChange "scene1"]
+                                stateChanges = [SceneChange "endScene"]
                             },
                             ConditionalAction
                             {
@@ -427,8 +427,8 @@ scene0 =
             ]
     }
 
-scene1 :: Scene
-scene1 =
+endScene :: Scene
+endScene =
     Scene
     {
         sceneDescription = ConditionalDescription [],
@@ -498,5 +498,8 @@ defaultScene =
     }
 
 allScenes :: (Data.Map.Map SceneKey Scene, [SceneKey])
-allScenes = (Data.Map.fromList [("scene0", scene0), ("scene1", scene1)], --List of scenes
-             ["scene1"]) --End scenes
+allScenes = (Data.Map.fromList
+                            [("openingScene", openingScene),
+                             ("endScene", endScene)
+                            ], --List of scenes
+                            ["endScene"]) --End scenes
