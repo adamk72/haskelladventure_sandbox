@@ -26,7 +26,7 @@ gameIntro = "Dummy Adventure by Laurence Emms\n"
 allVerbs :: [Token]
 allVerbs =
     [
-        TokenVerb "get" ["get", "take", "pick up"],
+        TokenVerb "get" ["get", "take", "pick up", "pickup"],
         TokenVerb "put" ["put", "place", "put down"],
         TokenVerb "throw" ["throw", "pitch"],
         TokenVerb "give" ["give"],
