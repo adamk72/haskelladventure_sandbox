@@ -1,24 +1,38 @@
 --TextAdventure.hs
 --Copyright Laurence Emms 2018
 --Text adventure executable
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# LANGUAGE LambdaCase #-}
 
 import           System.IO
 
 -- import CmdOptions
-import           CmdOptions        (AdventureOptions (AdventureOptions), parse)
-import           DummyAdventure    (allScenes, defaultScene, gameIntro,
-                                    startFlags, startInventory, startScene)
-import           NarrativeGraph    (makeNarrativeGraph)
-import           PrintUtils        (allColumnWidth, allDelimiters, printHelp,
-                                    printIntro)
-import           TextAdventureCore (adventure)
-import           TextReflow        (reflowPutStr)
+import           CmdOptions         (AdventureOptions (AdventureOptions), parse)
+import           DummyAdventure     (allScenes, defaultScene, gameIntro,
+                                     startFlags, startInventory, startScene)
+import           NarrativeGraph     (makeNarrativeGraph)
+import           PrintUtils         (allColumnWidth, allDelimiters, printHelp,
+                                     printIntro)
+import           TextAdventureCore  (adventure)
+import           TextReflow         (reflowPutStr)
+
+import           System.Environment as E
+
 
 main :: IO ()
-
 main =
     readFile "stories.txt" >>= parse >>=
     (\(AdventureOptions a) -> putStrLn $ "You chose: '" ++ a ++ "'.") >>
+    -- E.getArgs >>= print >>
+    E.getArgs >>= \case
+        ["-a", "Dummy Adventure"]       -> runDummy
+        ["-a", "Dummy"]                 -> runDummy
+        ["-a", "Nightmare Adventure"]   -> runDummy
+        ["-a", "Nightmare"]             -> runDummy
+        _                               -> putStrLn "I don't know what the adventure is. Please try again."
+
+runDummy :: IO ()
+runDummy =
     printIntro >>
     reflowPutStr allDelimiters allColumnWidth gameIntro >>
     putStr "\n" >>
@@ -28,3 +42,4 @@ main =
     adventure (makeNarrativeGraph adventureScenes endScenes defaultScene) (Just (startScene, startInventory, startFlags)) >>
     return ()
         where (adventureScenes, endScenes) = allScenes
+
