@@ -1,13 +1,15 @@
-module TextAdventureCore where
+module TextAdventureCore (doAdventureLoop, updateAdventure) where
 
-import System.IO
+import           System.IO             (hFlush, stdout)
 
-import NarrativeGraph
-import NaturalLanguageParser
-import PrintUtils
-import TextReflow
-
-import DummyAdventure
+import           NarrativeGraph        (Flags, Inventory, NarrativeGraph,
+                                        SceneKey, performInteraction,
+                                        printInvalidInteractions,
+                                        printSceneDescription)
+import           NaturalLanguageParser (Sentence)
+import           PrintUtils            (allColumnWidth, allDelimiters,
+                                        parseInput)
+import           TextReflow            (reflowPutStr)
 
 doAdventureLoop :: NarrativeGraph -> SceneKey -> Inventory -> Flags -> Maybe [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
 doAdventureLoop _ _ _ _ Nothing = return Nothing -- End state of the game

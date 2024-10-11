@@ -1,13 +1,16 @@
 --NaturalLanguageParser.hs
 --Copyright Laurence Emms 2018
 --Module for a general Natural Language parser
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 
 module NaturalLanguageParser (Sentence(..),
                               unambiguousSentence,
                               parseSentence) where
 
-import Data.List
-import NaturalLanguageLexer
+import           Data.List            (find)
+import           NaturalLanguageLexer (Token (..), TokenMatch (..))
 
 data Sentence = NullSentence | --Exists for completeness
                 Phrase Token |
@@ -16,25 +19,25 @@ data Sentence = NullSentence | --Exists for completeness
                 ComplexSentence Token Token Token Token |
                 ComplexPrepositionSentence Token Token Token Token Token deriving (Show, Eq)
 
---Helper functions to make sentences from the unambigous token names
+--Helper functions to make sentences from the unambiguous token names
 --These are intended for use only in the scene definition, not for natural language parsing
 findVerb :: [Token] -> String -> [Token]
 findVerb verbsList verb
     = case Data.List.find (\(TokenVerb v _) -> v == verb) verbsList of
       Just tokenVerb@(TokenVerb _ _) -> [tokenVerb]
-      Nothing -> []
+      Nothing                        -> []
 
 findNoun :: [Token] -> String -> [Token]
 findNoun nounsList noun
     = case Data.List.find (\(TokenNoun n _) -> n == noun) nounsList of
       Just tokenNoun@(TokenNoun _ _) -> [tokenNoun]
-      Nothing -> []
+      Nothing                        -> []
 
 findPreposition :: [Token] -> String -> [Token]
 findPreposition prepositionsList preposition
     = case Data.List.find (\(TokenPreposition p _) -> p == preposition) prepositionsList of
       Just tokenPreposition@(TokenPreposition _ _) -> [tokenPreposition]
-      Nothing -> []
+      Nothing                                      -> []
 
 makeUnambiguousSentence :: [Token] -> Sentence
 makeUnambiguousSentence [verb]
@@ -56,41 +59,40 @@ unambiguousSentence verbsList nounsList prepositionsList []
 unambiguousSentence verbsList nounsList prepositionsList [verb]
     = makeUnambiguousSentence (findVerb verbsList verb)
 unambiguousSentence verbsList nounsList prepositionsList [verb, noun]
-    = makeUnambiguousSentence (concat [(findVerb verbsList verb),
-                                       (findNoun nounsList noun)])
+    = makeUnambiguousSentence (findVerb verbsList verb ++ findNoun nounsList noun)
 unambiguousSentence verbsList nounsList prepositionsList [verb, preposition, noun]
-    | (length (findPreposition prepositionsList preposition)) /= 0
-        = makeUnambiguousSentence (concat [(findVerb verbsList verb),
-                                           (findPreposition prepositionsList preposition),
-                                           (findNoun nounsList noun)])
+    | not (null (findPreposition prepositionsList preposition))
+        = makeUnambiguousSentence (concat [findVerb verbsList verb,
+                                           findPreposition prepositionsList preposition,
+                                           findNoun nounsList noun])
     | otherwise
-        = makeUnambiguousSentence (concat [(findVerb verbsList verb),
-                                           (findNoun nounsList preposition),
-                                           (findNoun nounsList noun)])
+        = makeUnambiguousSentence (concat [findVerb verbsList verb,
+                                           findNoun nounsList preposition,
+                                           findNoun nounsList noun])
 unambiguousSentence verbsList nounsList prepositionsList [verb, noun0, preposition, noun1]
-    = makeUnambiguousSentence (concat [(findVerb verbsList verb),
-                                       (findNoun nounsList noun0),
-                                       (findPreposition prepositionsList preposition),
-                                       (findNoun nounsList noun1)])
+    = makeUnambiguousSentence (concat [findVerb verbsList verb,
+                                       findNoun nounsList noun0,
+                                       findPreposition prepositionsList preposition,
+                                       findNoun nounsList noun1])
 unambiguousSentence verbsList nounsList prepositionsList [verb, preposition0, noun0, preposition1, noun1]
-    = makeUnambiguousSentence (concat [(findVerb verbsList verb),
-                                       (findPreposition prepositionsList preposition0),
-                                       (findNoun nounsList noun0),
-                                       (findPreposition prepositionsList preposition1),
-                                       (findNoun nounsList noun1)])
+    = makeUnambiguousSentence (concat [findVerb verbsList verb,
+                                       findPreposition prepositionsList preposition0,
+                                       findNoun nounsList noun0,
+                                       findPreposition prepositionsList preposition1,
+                                       findNoun nounsList noun1])
 unambiguousSentence _ _ _ _
     = NullSentence
 
 --Functions to parse natural language sentences
 verbsInTokenList :: [Token] -> [Token]
-verbsInTokenList [] = []
+verbsInTokenList []                          = []
 verbsInTokenList (verb@(TokenVerb _ _) : ts) = verb : verbsInTokenList ts
-verbsInTokenList (_ : ts) = verbsInTokenList ts
+verbsInTokenList (_ : ts)                    = verbsInTokenList ts
 
 nounsInTokenList :: [Token] -> [Token]
-nounsInTokenList [] = []
+nounsInTokenList []                          = []
 nounsInTokenList (noun@(TokenNoun _ _) : ts) = noun : nounsInTokenList ts
-nounsInTokenList (_ : ts) = nounsInTokenList ts
+nounsInTokenList (_ : ts)                    = nounsInTokenList ts
 
 prepositionsInTokenList :: [Token] -> [Token]
 prepositionsInTokenList [] = []
@@ -101,9 +103,9 @@ makeSentence :: [[Token]] -> [Sentence]
 makeSentence []
     = []
 makeSentence [verbs]
-    = fmap (\verb -> Phrase verb) verbs
+    = fmap Phrase verbs
 makeSentence [verbs, nouns]
-    = fmap (\[verb, noun] -> SimpleSentence verb noun) 
+    = fmap (\[verb, noun] -> SimpleSentence verb noun)
       ((:) <$> verbs <*>
            ((:) <$> nouns <*> [[]]))
 makeSentence [verbs, prepositions, nouns]
@@ -126,27 +128,27 @@ makeSentence [verbs, prepositions0, nouns0, prepositions1, nouns1]
                       ((:) <$> nouns1 <*> [[]])))))
 
 parseSentence :: [TokenMatch] -> [Sentence]
-parseSentence [(TokenMatch _ t0), (TokenMatch _ t1), (TokenMatch _ t2), (TokenMatch _ t3), (TokenMatch _ t4)]
-    = makeSentence [(verbsInTokenList t0),
-                    (prepositionsInTokenList t1),
-                    (nounsInTokenList t2),
-                    (prepositionsInTokenList t3),
-                    (nounsInTokenList t4)]
-parseSentence [(TokenMatch _ t0), (TokenMatch _ t1), (TokenMatch _ t2), (TokenMatch _ t3)]
-    = makeSentence [(verbsInTokenList t0),
-                    (nounsInTokenList t1),
-                    (prepositionsInTokenList t2),
-                    (nounsInTokenList t3)]
-parseSentence [(TokenMatch _ t0), (TokenMatch _ t1), (TokenMatch _ t2)]
-    = (makeSentence [(verbsInTokenList t0),
-                     (prepositionsInTokenList t1),
-                     (nounsInTokenList t2)]) ++
-      (makeSentence [(verbsInTokenList t0),
-                     (nounsInTokenList t1),
-                     (nounsInTokenList t2)])
-parseSentence [(TokenMatch _ t0), (TokenMatch _ t1)]
-    = makeSentence [(verbsInTokenList t0),
-                    (nounsInTokenList t1)]
-parseSentence [(TokenMatch _ t0)]
-    = makeSentence [(verbsInTokenList t0)]
+parseSentence [TokenMatch _ t0, TokenMatch _ t1, TokenMatch _ t2, TokenMatch _ t3, TokenMatch _ t4]
+    = makeSentence [verbsInTokenList t0,
+                    prepositionsInTokenList t1,
+                    nounsInTokenList t2,
+                    prepositionsInTokenList t3,
+                    nounsInTokenList t4]
+parseSentence [TokenMatch _ t0, TokenMatch _ t1, TokenMatch _ t2, TokenMatch _ t3]
+    = makeSentence [verbsInTokenList t0,
+                    nounsInTokenList t1,
+                    prepositionsInTokenList t2,
+                    nounsInTokenList t3]
+parseSentence [TokenMatch _ t0, TokenMatch _ t1, TokenMatch _ t2]
+    = makeSentence [verbsInTokenList t0,
+                     prepositionsInTokenList t1,
+                     nounsInTokenList t2] ++
+      makeSentence [verbsInTokenList t0,
+                     nounsInTokenList t1,
+                     nounsInTokenList t2]
+parseSentence [TokenMatch _ t0, TokenMatch _ t1]
+    = makeSentence [verbsInTokenList t0,
+                    nounsInTokenList t1]
+parseSentence [TokenMatch _ t0]
+    = makeSentence [verbsInTokenList t0]
 parseSentence _ = []

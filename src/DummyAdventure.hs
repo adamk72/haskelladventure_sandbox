@@ -4,11 +4,21 @@
 
 module DummyAdventure (gameIntro, allVerbs, allNouns, allPrepositions, allTokens, startScene, startInventory, startFlags, defaultScene, allScenes) where
 
-import Data.Map
+import Data.Map ( fromList, Map )
 
-import NaturalLanguageLexer
-import NaturalLanguageParser
+import NaturalLanguageLexer ( Token(..) )
+import NaturalLanguageParser ( Sentence, unambiguousSentence )
 import NarrativeGraph
+    ( Scene(..),
+      Interaction(Interaction, conditionalActions, sentences),
+      ConditionalAction(ConditionalAction, stateChanges, condition,
+                        conditionalDescription),
+      ConditionalDescription(ConditionalDescription),
+      NarrativeCondition(CTrue, CAnd, CNot, FlagSet, InInventory),
+      StateChange(SceneChange, AddToInventory, RemoveFlag, SetFlag),
+      Inventory(..),
+      Flags(..),
+      SceneKey )
 
 gameIntro :: String
 gameIntro = "Dummy Adventure by Laurence Emms\n"

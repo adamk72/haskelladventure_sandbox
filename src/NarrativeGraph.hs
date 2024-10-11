@@ -1,6 +1,10 @@
 --NarrativeGraph.hs
 --Copyright Laurence Emms 2018
 --Module for representing a narrative graph in a text adventure
+{-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 
 module NarrativeGraph (SceneKey,
                        Flags(..),
@@ -19,18 +23,17 @@ module NarrativeGraph (SceneKey,
                        printInvalidInteractions,
                        performInteraction) where
 
-import System.IO
-import Data.List
-import qualified Data.List
+import           Data.List             (find)
 import qualified Data.Map
+import           System.IO
 
-import TextReflow
-import NaturalLanguageLexer
-import NaturalLanguageParser
+import qualified Control.Monad
+import           NaturalLanguageParser
+import           TextReflow
 
 type SceneKey = String
-data Flags = Flags [String] deriving (Show, Eq)
-data Inventory = Inventory [String] deriving (Show, Eq)
+newtype Flags = Flags [String] deriving (Show, Eq)
+newtype Inventory = Inventory [String] deriving (Show, Eq)
 data StateChange = AddToInventory String |
                    RemoveFromInventory String |
                    SetFlag String |
@@ -46,17 +49,17 @@ data NarrativeCondition = InInventory String | --Inventory has an item
                           COr NarrativeCondition NarrativeCondition |
                           CAnd NarrativeCondition NarrativeCondition deriving (Show, Eq)
 
-data ConditionalDescription = ConditionalDescription [(NarrativeCondition, String, [StateChange])] deriving (Show, Eq)
+newtype ConditionalDescription = ConditionalDescription [(NarrativeCondition, String, [StateChange])] deriving (Show, Eq)
 
 data ConditionalAction = ConditionalAction {condition :: NarrativeCondition, --Condition under which action occurs
                                             conditionalDescription :: ConditionalDescription, --Description of action
                                             stateChanges :: [StateChange]} deriving (Show, Eq) --State changes to make
 
-data Interaction = Interaction {sentences :: [Sentence],
+data Interaction = Interaction {sentences          :: [Sentence],
                                 conditionalActions :: [ConditionalAction]} deriving (Show, Eq)
 
 data Scene = Scene {sceneDescription :: ConditionalDescription,
-                    interactions :: [Interaction]} deriving (Show, Eq)
+                    interactions     :: [Interaction]} deriving (Show, Eq)
 
 --By definition the first node in the narrative graph is the starting scene of the game
 data NarrativeGraph = NarrativeGraph {nodes :: Data.Map.Map SceneKey Scene,
@@ -77,11 +80,11 @@ evaluateCondition (FlagSet flag) _ _ (Flags flags) = flag `elem` flags
 evaluateCondition (SceneIs scene) currentScene _ _ = scene == currentScene
 evaluateCondition (InInventory object) _ (Inventory inventory) _ = object `elem` inventory
 evaluateCondition (CNot condition) scene inventory flags = not (evaluateCondition condition scene inventory flags)
-evaluateCondition (COr condition0 condition1) scene inventory flags = (evaluateCondition condition0 scene inventory flags) || (evaluateCondition condition1 scene inventory flags)
-evaluateCondition (CAnd condition0 condition1) scene inventory flags = (evaluateCondition condition0 scene inventory flags) && (evaluateCondition condition1 scene inventory flags)
+evaluateCondition (COr condition0 condition1) scene inventory flags = evaluateCondition condition0 scene inventory flags || evaluateCondition condition1 scene inventory flags
+evaluateCondition (CAnd condition0 condition1) scene inventory flags = evaluateCondition condition0 scene inventory flags && evaluateCondition condition1 scene inventory flags
 
 --Print a conditional description by evaluating which conditions are true, concatenating the description, and printing it with reflowPutStrs
-printConditionalDescription :: [Char] -> Int -> [SceneKey] -> ConditionalDescription -> [String] -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
+printConditionalDescription :: String -> Int -> [SceneKey] -> ConditionalDescription -> [String] -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
 printConditionalDescription delimiters columnWidth _ (ConditionalDescription []) linesToPrint Nothing
     = reflowPutStrs delimiters columnWidth (reverse linesToPrint) >> putStr "\n" >> return Nothing --Game reached an end state
 printConditionalDescription delimiters columnWidth _ (ConditionalDescription []) linesToPrint (Just (sceneKey, inventory, flags))
@@ -91,9 +94,8 @@ printConditionalDescription delimiters columnWidth _ (ConditionalDescription ((_
 printConditionalDescription delimiters columnWidth endScenes
                             (ConditionalDescription ((condition, subDescription, stateChanges) : remainingDescriptions)) linesToPrint (Just (sceneKey, inventory, flags))
     | evaluateCondition condition sceneKey inventory flags =
-          stateChange (Data.List.find (\x -> case x of
-                                             (SceneChange _) -> True
-                                             otherwise -> False) stateChanges)
+          stateChange (Data.List.find (\case (SceneChange _) -> True
+                                             _ -> False) stateChanges)
                        endScenes
                        stateChanges
                        (Just (sceneKey, inventory, flags)) >>= --This conditional description passed all of the preconditions, check whether we need to transition to a new state
@@ -101,7 +103,7 @@ printConditionalDescription delimiters columnWidth endScenes
     | otherwise
         = printConditionalDescription delimiters columnWidth endScenes (ConditionalDescription remainingDescriptions) linesToPrint (Just (sceneKey, inventory, flags))
 
-printSceneDescription :: [Char] -> Int -> NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
+printSceneDescription :: String -> Int -> NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
 printSceneDescription delimiters columnWidth (NarrativeGraph {nodes = graphNodes, endScenes = graphEndScenes}) Nothing
     = return Nothing
 printSceneDescription delimiters columnWidth (NarrativeGraph {nodes = graphNodes, endScenes = graphEndScenes}) (Just (sceneKey, inventory, flags))
@@ -113,7 +115,7 @@ printSceneDescription delimiters columnWidth (NarrativeGraph {nodes = graphNodes
 
 updateFlags :: Flags -> [StateChange] -> Flags
 updateFlags (Flags flags) [] = Flags flags
-updateFlags (Flags flags) ((RemoveFlag flag) : remainingChanges) = updateFlags (Flags (filter (\x -> x /= flag) flags)) remainingChanges
+updateFlags (Flags flags) ((RemoveFlag flag) : remainingChanges) = updateFlags (Flags (filter (/= flag) flags)) remainingChanges
 updateFlags (Flags flags) ((SetFlag flag) : remainingChanges)
     | flag `elem` flags = updateFlags (Flags flags) remainingChanges
     | otherwise = updateFlags (Flags (flag : flags)) remainingChanges
@@ -121,7 +123,7 @@ updateFlags (Flags flags) (_ : remainingChanges) = updateFlags (Flags flags) rem
 
 updateInventory :: Inventory -> [StateChange] -> Inventory
 updateInventory (Inventory inventory) [] = Inventory inventory
-updateInventory (Inventory inventory) ((RemoveFromInventory object) : remainingChanges) = updateInventory (Inventory (filter (\x -> x /= object) inventory)) remainingChanges
+updateInventory (Inventory inventory) ((RemoveFromInventory object) : remainingChanges) = updateInventory (Inventory (filter (/= object) inventory)) remainingChanges
 updateInventory (Inventory inventory) ((AddToInventory object) : remainingChanges)
     | object `elem` inventory = updateInventory (Inventory inventory) remainingChanges
     | otherwise = updateInventory (Inventory (object : inventory)) remainingChanges
@@ -132,13 +134,13 @@ updateInventory (Inventory inventory) (_ : remainingChanges) = updateInventory (
 stateChange :: Maybe StateChange -> [SceneKey] -> [StateChange] -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
 stateChange Nothing _  stateChanges Nothing
     = return Nothing
-stateChange _ endScenes stateChanges Nothing 
+stateChange _ endScenes stateChanges Nothing
     = return Nothing
 stateChange Nothing _  stateChanges (Just (sceneKey, inventory, flags))
     = return (Just (sceneKey,
                     updateInventory inventory stateChanges,
                     updateFlags flags stateChanges)) --If there is no scene transition, return to the current scene with updated inventory and flags
-stateChange (Just (SceneChange nextScene)) endScenes stateChanges (Just (sceneKey, inventory, flags)) 
+stateChange (Just (SceneChange nextScene)) endScenes stateChanges (Just (sceneKey, inventory, flags))
     = if nextScene `elem` endScenes
       then getChar >> return Nothing --This is an end state for the game
       else return (Just (nextScene,
@@ -147,18 +149,18 @@ stateChange (Just (SceneChange nextScene)) endScenes stateChanges (Just (sceneKe
 
 --Update game state takes an interaction description, fail string, next scene index, end scene index, current scene index, inventory, and flags
 --Update game state Scene transition evaluates to the next state of the game
-updateGameState :: [Char] -> Int -> [SceneKey] -> SceneKey -> Inventory -> Flags -> ConditionalAction -> IO (Maybe (SceneKey, Inventory, Flags))
+updateGameState :: String -> Int -> [SceneKey] -> SceneKey -> Inventory -> Flags -> ConditionalAction -> IO (Maybe (SceneKey, Inventory, Flags))
 updateGameState delimiters columnWidth endScenes currentSceneKey inventory flags conditionalAction@(ConditionalAction {conditionalDescription = thisConditionalDescription,
                                                                                                     stateChanges = thisStateChanges})
     = printConditionalDescription delimiters columnWidth endScenes thisConditionalDescription [] (Just (currentSceneKey, inventory, flags)) >>=
       stateChange (Data.List.find (\x -> case x of
                                          (SceneChange _) -> True
-                                         otherwise -> False) thisStateChanges)
+                                         otherwise       -> False) thisStateChanges)
                    endScenes
                    thisStateChanges --This conditional action passed all of the preconditions, check whether we need to transition to a new scene
 
 --Perform the interaction and return a tuple of (new scene index, new inventory, new flags)
-performConditionalActions :: [Char] -> Int -> SceneKey -> [SceneKey] -> Inventory -> Flags -> Maybe Interaction -> Maybe Interaction -> IO (Maybe (SceneKey, Inventory, Flags))
+performConditionalActions :: String -> Int -> SceneKey -> [SceneKey] -> Inventory -> Flags -> Maybe Interaction -> Maybe Interaction -> IO (Maybe (SceneKey, Inventory, Flags))
 performConditionalActions _ _ currentSceneKey _ inventory flags Nothing Nothing
     = putStr "That does nothing." >>
       hFlush stdout >>
@@ -211,15 +213,15 @@ performConditionalActions delimiters
                                                                 conditionalActions = remainingConditionalActions})) --The condition for the action failed, attempt other actions
 
 matchInteraction :: (Interaction, Sentence) -> Bool
-matchInteraction ((Interaction {sentences = thisSentences}), sentence)
+matchInteraction (Interaction {sentences = thisSentences}, sentence)
     | sentence `elem` thisSentences = True
     | otherwise = False
 
 findInteraction :: [Interaction] -> [Sentence] -> Maybe Interaction
-findInteraction interactions sentences = (find matchInteraction ((\x -> (\y -> (x, y))) <$> interactions <*> sentences)) >>=
-                                         (\(x, y) -> Just x)
+findInteraction interactions sentences = find matchInteraction ((\x -> (\y -> (x, y))) <$> interactions <*> sentences) >>=
+                                         (\(x, _) -> Just x)
 
-filterInteraction :: [Char] -> Int -> Scene -> Scene -> SceneKey -> [SceneKey] -> Inventory -> Flags -> [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
+filterInteraction :: String -> Int -> Scene -> Scene -> SceneKey -> [SceneKey] -> Inventory -> Flags -> [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
 filterInteraction delimiters
                   columnWidth
                   (Scene {sceneDescription = _,
@@ -243,18 +245,18 @@ hasInvalidInteractions (interaction@(Interaction {sentences = thisSentences}) : 
 
 printInvalidInteractions :: NarrativeGraph -> SceneKey -> IO ()
 printInvalidInteractions narrativeGraph@(NarrativeGraph {nodes = graphNodes}) sceneKey
-    = let scene = Data.Map.lookup sceneKey graphNodes 
+    = let scene = Data.Map.lookup sceneKey graphNodes
       in case scene of
-          Nothing -> putStrLn (sceneKey ++ " is not a valid scene") >> return ()
+          Nothing -> Control.Monad.void (putStrLn (sceneKey ++ " is not a valid scene"))
           Just (Scene {sceneDescription = _, interactions = sceneInteractions})
               -> case hasInvalidInteractions sceneInteractions of
                      Nothing -> return ()
-                     Just interaction@(Interaction {sentences = thisSentences}) -> putStrLn ("Invalid interaction: " ++  (show interaction))
+                     Just interaction@(Interaction {sentences = thisSentences}) -> putStrLn ("Invalid interaction: " ++  show interaction)
 
 --Perform an interaction with the current scene
 --Takes the narrative graph, current scene index, inventory, and sentence as input
 --Evaluates to Maybe of the next scene index and inventory state
-performInteraction :: [Char] -> Int -> NarrativeGraph -> SceneKey -> Inventory -> Flags -> [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
+performInteraction :: String -> Int -> NarrativeGraph -> SceneKey -> Inventory -> Flags -> [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
 performInteraction _ _ _ sceneKey inventory flags []
     = putStrLn "Please enter a command." >>
       hFlush stdout >>

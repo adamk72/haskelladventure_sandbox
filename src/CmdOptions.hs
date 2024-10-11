@@ -1,8 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module CmdOptions (parse, AdventureOptions(AdventureOptions)) where
 
-import Prettyprinter
-import Options.Applicative
+import           Options.Applicative (Parser, ParserInfo, execParser, fullDesc,
+                                      header, help, helper, info, infoOption,
+                                      long, metavar, progDesc, progDescDoc,
+                                      short, strOption, (<**>))
+import           Prettyprinter       (Pretty (pretty), indent, vsep)
 
 newtype AdventureOptions = AdventureOptions String
   -- { adventure      :: String }

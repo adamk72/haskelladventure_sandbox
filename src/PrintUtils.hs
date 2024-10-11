@@ -1,19 +1,20 @@
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 module PrintUtils where
 
-import System.IO
+import System.IO ( hFlush, stdout )
 
-import NarrativeGraph
-import NaturalLanguageLexer
-import NaturalLanguageParser
-import TextReflow
+import NarrativeGraph ( Inventory(..), Flags(..) )
+import NaturalLanguageLexer ( TokenMatch(..), Token(..), lexInput )
+import NaturalLanguageParser ( Sentence, parseSentence )
+import TextReflow ( reflowPutStr, reflowPutStrs )
 
 import qualified Data.Char
 import qualified Data.List.Split
-import qualified Data.Text
 
-import DummyAdventure
+import DummyAdventure ( allVerbs, allPrepositions, allTokens )
 
-allDelimiters :: [Char]
+allDelimiters :: String
 allDelimiters = [' ', '\t']
 
 
@@ -21,10 +22,10 @@ allColumnWidth :: Int
 allColumnWidth = 120
 
 printTokens :: String -> [Token] -> IO ()
-printTokens word [] = return () >> putStr "\n" >> hFlush stdout
-printTokens word ((TokenVerb _ _) : tokens) = (putStrLn ("== Verb " ++ word)) >> printTokens word tokens >> hFlush stdout
-printTokens word ((TokenNoun _ _) : tokens) = (putStrLn ("== Noun " ++ word)) >> printTokens word tokens >> hFlush stdout
-printTokens word ((TokenPreposition _ _) : tokens) = (putStrLn ("== Preposition " ++ word)) >> printTokens word tokens >> hFlush stdout
+printTokens word [] = putStr "\n" >> hFlush stdout
+printTokens word ((TokenVerb _ _) : tokens) = putStrLn ("== Verb " ++ word) >> printTokens word tokens >> hFlush stdout
+printTokens word ((TokenNoun _ _) : tokens) = putStrLn ("== Noun " ++ word) >> printTokens word tokens >> hFlush stdout
+printTokens word ((TokenPreposition _ _) : tokens) = putStrLn ("== Preposition " ++ word) >> printTokens word tokens >> hFlush stdout
 
 --Print tokens for a word
 printWordTokens :: [TokenMatch] -> IO ()
@@ -34,13 +35,13 @@ printWordTokens ((TokenMatch word matchedTokens) : tokens) = printTokens word ma
 --Print sentence
 printSentences :: [Sentence] -> IO ()
 printSentences [] = putStr "I'm sorry, I don't understand what you said." >> hFlush stdout
-printSentences (sentence : []) = putStrLn (show sentence) >> hFlush stdout
-printSentences (sentence : sentences) = putStrLn (show sentence) >> printSentences sentences >> hFlush stdout
+printSentences [sentence] = print sentence >> hFlush stdout
+printSentences (sentence : sentences) = print sentence >> printSentences sentences >> hFlush stdout
 
 --Print intro
 printIntro :: IO ()
 printIntro
-    = reflowPutStrs allDelimiters 
+    = reflowPutStrs allDelimiters
                     allColumnWidth
                     ["Haskell Text Adventure Engine v1.0\n",
                      "Copyright Laurence Emms 2018\n\n\n"] >>
@@ -78,13 +79,13 @@ printVerbs [] = putStr "\n" >> hFlush stdout
 printVerbs ((TokenVerb name synonyms) : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ (show synonyms) ++ "\n") >>
+                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printVerbs tokens >>
       hFlush stdout
 printVerbs (_ : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Invalid token\n") >>
+                   "Invalid token\n" >>
       printVerbs tokens >>
       hFlush stdout
 
@@ -93,12 +94,12 @@ printNouns [] = putStr "\n" >> hFlush stdout
 printNouns ((TokenNoun name synonyms) : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ (show synonyms) ++ "\n") >>
+                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printNouns tokens >> hFlush stdout
 printNouns (_ : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Invalid token\n") >>
+                   "Invalid token\n" >>
       printNouns tokens >> hFlush stdout
 
 printPrepositions :: [Token] -> IO ()
@@ -106,12 +107,12 @@ printPrepositions [] = putStr "\n" >> hFlush stdout
 printPrepositions ((TokenPreposition name synonyms) : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ (show synonyms) ++ "\n") >>
+                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printPrepositions tokens >> hFlush stdout
 printPrepositions (_ : tokens)
     = reflowPutStr allDelimiters
                    allColumnWidth
-                   ("Invalid token\n") >>
+                   "Invalid token\n" >>
       printPrepositions tokens >> hFlush stdout
 
 printInventory :: Inventory -> IO ()
@@ -140,7 +141,7 @@ parseInput inventory flags line
     | map Data.Char.toLower line == "inventory" = putStrLn "All items in inventory:" >> printInventory inventory >> return (Just [])
     -- | map Data.Char.toLower line == "flags" = putStrLn "All currently set flags:" >> printFlags flags >> return (Just [])
     | map Data.Char.toLower line == "quit" = putStrLn "Thanks for playing!" >> hFlush stdout >> return Nothing
-    | sentences == [] = putStr "I'm sorry, I don't understand what you said." >> hFlush stdout >> return (Just sentences)
+    | null sentences = putStr "I'm sorry, I don't understand what you said." >> hFlush stdout >> return (Just sentences)
     | otherwise = --printWordTokens sentenceTokenMatches >>
                   --printSentences sentences >>
                   hFlush stdout >>
