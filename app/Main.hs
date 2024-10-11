@@ -20,9 +20,7 @@ main = printIntro >>
        reflowPutStr allDelimiters allColumnWidth gameIntro >>
        putStr "\n" >>
        printHelp >>
-       putStr "\n" >>
-       putStr "\n" >>
-       putStr "\n" >>
+       putStr "\n\n\n" >>
        hFlush stdout >>
        adventure (makeNarrativeGraph adventureScenes endScenes defaultScene) (Just (startScene, startInventory, startFlags)) >>
        return ()

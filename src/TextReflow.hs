@@ -10,7 +10,7 @@ module TextReflow (joinStrings,
                    reflowString,
                    reflowStrings) where
 
-import qualified Data.List.Split
+import qualified Data.List.Split as D
 import           Prelude         hiding (lines, words)
 
 joinStrings :: String -> [String] -> String
@@ -31,7 +31,7 @@ reflowLine c columnWidth (word : words) (line : result)
 reflowLines :: String -> Int -> [String] -> [String]
 reflowLines _ _ [] = [] --No lines to reflow
 reflowLines delimiters columnWidth (line : lines)
-    = reflowLine 0 columnWidth (Data.List.Split.split (Data.List.Split.keepDelimsR $ Data.List.Split.oneOf delimiters) line) [] ++ reflowLines delimiters columnWidth lines
+    = reflowLine 0 columnWidth (D.split (D.keepDelimsR $ D.oneOf delimiters) line) [] ++ reflowLines delimiters columnWidth lines
 
 --Insert newlines into the reflowed lines, ignoring all lines which are followed by a delimiter line
 intercalateNewlines :: [String] -> String
@@ -44,7 +44,7 @@ intercalateNewlines (line1 : line2 : linesRemaining)
 reflowPutStr :: String -> Int -> String -> IO ()
 reflowPutStr delimiters columnWidth line
     = putStr (intercalateNewlines (reflowLines delimiters columnWidth lines))
-        where lines = Data.List.Split.split (Data.List.Split.keepDelimsR $ Data.List.Split.oneOf "\n") line --Split into lines keeping existing newlines
+        where lines = D.split (D.keepDelimsR $ D.oneOf "\n") line --Split into lines keeping existing newlines
 
 reflowPutStrs :: String -> Int -> [String] -> IO ()
 reflowPutStrs delimiters columnWidth lines = reflowPutStr delimiters columnWidth (concat lines)
@@ -52,7 +52,7 @@ reflowPutStrs delimiters columnWidth lines = reflowPutStr delimiters columnWidth
 reflowString :: String -> Int -> String -> [String]
 reflowString delimiters columnWidth string
     = reflowLines delimiters columnWidth lines
-        where lines = Data.List.Split.split (Data.List.Split.keepDelimsR $ Data.List.Split.oneOf "\n") string
+        where lines = D.split (D.keepDelimsR $ D.oneOf "\n") string
 
 reflowStrings :: String -> Int -> [String] -> [String]
 reflowStrings delimiters columnWidth strings = reflowString delimiters columnWidth (concat strings)

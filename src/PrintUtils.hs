@@ -44,7 +44,7 @@ printIntro
     = reflowPutStrs allDelimiters
                     allColumnWidth
                     ["Haskell Text Adventure Engine v1.0\n",
-                     "Copyright Laurence Emms 2018\n\n\n"] >>
+                     "Copyright Laurence Emms 2018\n"] >>
       hFlush stdout
 
 --Print help text
@@ -52,17 +52,20 @@ printHelp :: IO ()
 printHelp
     = reflowPutStrs allDelimiters
                     allColumnWidth
-                    ["The following commands are available:\n",
-                     "Inventory - Print all current inventory items.\n",
-                     "Help - Print help text.\n",
-                     "Grammar - Print available grammar.\n",
-                     "Verbs - Print all available verbs.\n",
-                     "Prepositions - Print all available prepositions.\n",
-                     -- "Nouns - Print all available nouns. Warning, this contains spoilers!\n",
-                     -- "Flags - Print all current flags. Warning, this contains spoilers!\n",
-                     "Quit - Exit the  game.\n",
-                     "--------------------"] >>
-      hFlush stdout
+                    ("The following commands are available:\n" :
+                    fmap (\t -> "\t> "++t++"\n")
+                        ["Inventory - Print all current inventory items.",
+                        "Help - Print help text.",
+                        "Grammar - Print available grammar.",
+                        "Verbs - Print all available verbs.",
+                        "Prepositions - Print all available prepositions.",
+                        -- "Nouns - Print all available nouns. Warning, this contains spoilers!",
+                        -- "Flags - Print all current flags. Warning, this contains spoilers!",
+                        "Quit - Exit the  game."
+                        ]
+                    ++ ["------------------"]
+                    )
+      >> hFlush stdout
 
 printGrammar :: IO ()
 printGrammar
