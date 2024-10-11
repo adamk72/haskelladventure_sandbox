@@ -28,8 +28,15 @@ updateAdventure narrativeGraph (Just (sceneKey, inventory, flags))
       (\state -> putStr "\n" >> hFlush stdout >> return state) >>=
       doAdventureLoop narrativeGraph sceneKey inventory flags
 
-adventure :: NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
+adventure :: NarrativeGraph -> 
+             Maybe (SceneKey, Inventory, Flags) ->
+             IO (Maybe (SceneKey, Inventory, Flags))
 adventure _ Nothing = reflowPutStr allDelimiters allColumnWidth "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
-adventure narrativeGraph (Just (sceneKey, inventory, flags))
-    = printSceneDescription allDelimiters allColumnWidth narrativeGraph (Just (sceneKey, inventory, flags)) >>=
+adventure 
+  narrativeGraph (Just (sceneKey, inventory, flags)) =
+    printSceneDescription
+      allDelimiters
+      allColumnWidth
+      narrativeGraph
+      (Just (sceneKey, inventory, flags)) >>=
       updateAdventure narrativeGraph

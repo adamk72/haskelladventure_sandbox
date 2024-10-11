@@ -153,9 +153,9 @@ updateGameState :: String -> Int -> [SceneKey] -> SceneKey -> Inventory -> Flags
 updateGameState delimiters columnWidth endScenes currentSceneKey inventory flags conditionalAction@(ConditionalAction {conditionalDescription = thisConditionalDescription,
                                                                                                     stateChanges = thisStateChanges})
     = printConditionalDescription delimiters columnWidth endScenes thisConditionalDescription [] (Just (currentSceneKey, inventory, flags)) >>=
-      stateChange (Data.List.find (\x -> case x of
-                                         (SceneChange _) -> True
-                                         otherwise       -> False) thisStateChanges)
+      stateChange (Data.List.find (\case
+                                    (SceneChange _) -> True
+                                    _               -> False) thisStateChanges)
                    endScenes
                    thisStateChanges --This conditional action passed all of the preconditions, check whether we need to transition to a new scene
 
@@ -218,7 +218,7 @@ matchInteraction (Interaction {sentences = thisSentences}, sentence)
     | otherwise = False
 
 findInteraction :: [Interaction] -> [Sentence] -> Maybe Interaction
-findInteraction interactions sentences = find matchInteraction ((\x -> (\y -> (x, y))) <$> interactions <*> sentences) >>=
+findInteraction interactions sentences = find matchInteraction ((,) <$> interactions <*> sentences) >>=
                                          (\(x, _) -> Just x)
 
 filterInteraction :: String -> Int -> Scene -> Scene -> SceneKey -> [SceneKey] -> Inventory -> Flags -> [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
