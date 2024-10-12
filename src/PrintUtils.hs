@@ -4,14 +4,13 @@ module PrintUtils where
 
 import           System.IO             (hFlush, stdout)
 
+import qualified Data.Char
+import qualified Data.List.Split
 import           NarrativeGraph        (Flags (..), Inventory (..))
 import           NaturalLanguageLexer  (Token (..), TokenMatch (..), lexInput)
 import           NaturalLanguageParser (Sentence, parseSentence)
 import           PrintParams           (allDelimiters)
 import           TextReflow            (reflowPutStr, reflowPutStrs)
-
-import qualified Data.Char
-import qualified Data.List.Split
 
 import           DummyAdventure        (allPrepositions, allTokens, allVerbs)
 
@@ -105,16 +104,16 @@ printFlags (Flags (flag : remainingFlags))
     = reflowPutStr (flag ++ ".\n") >>
       printFlags (Flags remainingFlags) >> hFlush stdout
 
-parseInput :: Inventory -> Flags -> String -> IO (Maybe [Sentence])
-parseInput inventory flags line
-    | map Data.Char.toLower line == "help" = printHelp >> return (Just [])
-    | map Data.Char.toLower line == "grammar" = putStrLn "All grammar:" >> printGrammar >> return (Just [])
-    | map Data.Char.toLower line == "verbs" = putStrLn "All verbs:" >> printVerbs allVerbs >> return (Just [])
-    -- | map Data.Char.toLower line == "nouns" = putStrLn "All nouns:" >> printNouns allNouns >> return (Just [])
-    | map Data.Char.toLower line == "prepositions" = putStrLn "All prepositions:" >> printPrepositions allPrepositions >> return (Just [])
-    | map Data.Char.toLower line == "inventory" = putStrLn "All items in inventory:" >> printInventory inventory >> return (Just [])
-    -- | map Data.Char.toLower line == "flags" = putStrLn "All currently set flags:" >> printFlags flags >> return (Just [])
-    | (map Data.Char.toLower line == ":q" || map Data.Char.toLower line == "quit" || map Data.Char.toLower line == ":quit") = putStrLn "Thanks for playing!" >> hFlush stdout >> return Nothing
+parseInput :: [Token] -> [Token] -> [Token] -> Inventory -> Flags -> String -> IO (Maybe [Sentence])
+parseInput verbs prepositions tokens inventory flags line
+    | isCmd line "help" = printHelp >> return (Just [])
+    | isCmd line "grammar" = putStrLn "All grammar:" >> printGrammar >> return (Just [])
+    | isCmd line "verbs" = putStrLn "All verbs:" >> printVerbs verbs >> return (Just [])
+    -- | isCmd line "nouns" = putStrLn "All nouns:" >> printNouns allNouns >> return (Just [])
+    | isCmd line "prepositions" = putStrLn "All prepositions:" >> printPrepositions prepositions >> return (Just [])
+    | isCmd line "inventory" = putStrLn "All items in inventory:" >> printInventory inventory >> return (Just [])
+    -- | isCmd line "flags" = putStrLn "All currently set flags:" >> printFlags flags >> return (Just [])
+    | isCmd line ":q" || isCmd line "quit" || isCmd line ":quit" = putStrLn "Thanks for playing!" >> hFlush stdout >> return Nothing
     | null sentences = putStr "I'm sorry, I don't understand what you said." >> hFlush stdout >> return (Just sentences)
     | otherwise = --printWordTokens sentenceTokenMatches >>
                   --printSentences sentences >>
@@ -123,3 +122,4 @@ parseInput inventory flags line
         where inputWords = Data.List.Split.splitOneOf allDelimiters line
               sentenceTokenMatches = lexInput allTokens inputWords
               sentences = parseSentence sentenceTokenMatches
+              isCmd a b = map Data.Char.toLower a == b

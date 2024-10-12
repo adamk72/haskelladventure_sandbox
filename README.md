@@ -12,6 +12,6 @@
 - [x] Allow user to input one of those adventure as a command line argument and then display content from a second file associated with that name.
 - [] (Low) Add a more complete description of the adventures in the help.
 - [x] Refactor out all of the redundant uses of delimiters and column width for easier reading.
-- [] Clean up where Dummy and Nightmare will probably clash.
+- [x] Clean up where Dummy and Nightmare will probably clash.
 - [x] Basic: Have it pickup on ":q", so I can stop getting snagged when I type ":q" every time I try to exit.
 - [] Advanced: Create a ":" prepended meta-vocabulary (not sure it's needed at this point)

@@ -48,22 +48,34 @@ data NarrativeCondition = InInventory String | --Inventory has an item
                           COr NarrativeCondition NarrativeCondition |
                           CAnd NarrativeCondition NarrativeCondition deriving (Show, Eq)
 
-newtype ConditionalDescription = ConditionalDescription [(NarrativeCondition, String, [StateChange])] deriving (Show, Eq)
+newtype ConditionalDescription = ConditionalDescription [(
+    NarrativeCondition,
+    String,
+    [StateChange])]
+    deriving (Show, Eq)
 
-data ConditionalAction = ConditionalAction {condition :: NarrativeCondition, --Condition under which action occurs
-                                            conditionalDescription :: ConditionalDescription, --Description of action
-                                            stateChanges :: [StateChange]} deriving (Show, Eq) --State changes to make
+data ConditionalAction = ConditionalAction {
+    condition :: NarrativeCondition, --Condition under which action occurs
+    conditionalDescription :: ConditionalDescription, --Description of action
+    stateChanges :: [StateChange]}
+    deriving (Show, Eq) --State changes to make
 
-data Interaction = Interaction {sentences          :: [Sentence],
-                                conditionalActions :: [ConditionalAction]} deriving (Show, Eq)
+data Interaction = Interaction {
+    sentences          :: [Sentence],
+    conditionalActions :: [ConditionalAction]}
+    deriving (Show, Eq)
 
-data Scene = Scene {sceneDescription :: ConditionalDescription,
-                    interactions     :: [Interaction]} deriving (Show, Eq)
+data Scene = Scene {
+    sceneDescription :: ConditionalDescription,
+    interactions     :: [Interaction]}
+    deriving (Show, Eq)
 
 --By definition the first node in the narrative graph is the starting scene of the game
-data NarrativeGraph = NarrativeGraph {nodes :: Data.Map.Map SceneKey Scene,
-                                      endScenes :: [SceneKey],
-                                      graphDefaultScene :: Scene} deriving (Show, Eq)
+data NarrativeGraph = NarrativeGraph {
+    nodes :: Data.Map.Map SceneKey Scene,
+    endScenes :: [SceneKey],
+    graphDefaultScene :: Scene}
+    deriving (Show, Eq)
 
 --Takes a list of scenes and returns a starting index and a NarrativeGraph
 makeNarrativeGraph :: Data.Map.Map SceneKey Scene -> [SceneKey] -> Scene -> NarrativeGraph
@@ -149,8 +161,7 @@ stateChange (Just (SceneChange nextScene)) endScenes stateChanges (Just (sceneKe
 --Update game state takes an interaction description, fail string, next scene index, end scene index, current scene index, inventory, and flags
 --Update game state Scene transition evaluates to the next state of the game
 updateGameState :: [SceneKey] -> SceneKey -> Inventory -> Flags -> ConditionalAction -> IO (Maybe (SceneKey, Inventory, Flags))
-updateGameState endScenes currentSceneKey inventory flags conditionalAction@(ConditionalAction {conditionalDescription = thisConditionalDescription,
-                                                                                                    stateChanges = thisStateChanges})
+updateGameState endScenes currentSceneKey inventory flags conditionalAction@(ConditionalAction {conditionalDescription = thisConditionalDescription, stateChanges = thisStateChanges})
     = printConditionalDescription endScenes thisConditionalDescription [] (Just (currentSceneKey, inventory, flags)) >>=
       stateChange (Data.List.find (\case
                                     (SceneChange _) -> True
