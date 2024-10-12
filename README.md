@@ -4,7 +4,7 @@
 
 - `stack build`
 - `stack run TextAdventure-exe -- --help`
-s
+
 ## Todos
 
 - [x] Pull list of adventures from a text file and initially display on screen.
@@ -13,3 +13,5 @@ s
 - [] (Low) Add a more complete description of the adventures in the help.
 - [x] Refactor out all of the redundant uses of delimiters and column width for easier reading.
 - [] Clean up where Dummy and Nightmare will probably clash.
+- [x] Basic: Have it pickup on ":q", so I can stop getting snagged when I type ":q" every time I try to exit.
+- [] Advanced: Create a ":" prepended meta-vocabulary (not sure it's needed at this point)
