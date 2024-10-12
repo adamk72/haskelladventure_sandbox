@@ -2,24 +2,18 @@
 {-# OPTIONS_GHC -Wno-unused-matches #-}
 module PrintUtils where
 
-import System.IO ( hFlush, stdout )
+import           System.IO             (hFlush, stdout)
 
-import NarrativeGraph ( Inventory(..), Flags(..) )
-import NaturalLanguageLexer ( TokenMatch(..), Token(..), lexInput )
-import NaturalLanguageParser ( Sentence, parseSentence )
-import TextReflow ( reflowPutStr, reflowPutStrs )
+import           NarrativeGraph        (Flags (..), Inventory (..))
+import           NaturalLanguageLexer  (Token (..), TokenMatch (..), lexInput)
+import           NaturalLanguageParser (Sentence, parseSentence)
+import           PrintParams           (allColumnWidth, allDelimiters)
+import           TextReflow            (reflowPutStr, reflowPutStrs)
 
 import qualified Data.Char
 import qualified Data.List.Split
 
-import DummyAdventure ( allVerbs, allPrepositions, allTokens )
-
-allDelimiters :: String
-allDelimiters = [' ', '\t']
-
-
-allColumnWidth :: Int
-allColumnWidth = 120
+import           DummyAdventure        (allPrepositions, allTokens, allVerbs)
 
 printTokens :: String -> [Token] -> IO ()
 printTokens word [] = putStr "\n" >> hFlush stdout

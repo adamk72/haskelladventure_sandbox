@@ -3,23 +3,23 @@
 --Text adventure executable
 {-# LANGUAGE LambdaCase #-}
 
-import           System.Environment as E (getArgs)
-import           System.IO          (hFlush, stdout)
-
 import           CmdOptions         (parse)
 import           Data.Map           (Map)
+import           NarrativeGraph     (Flags, Inventory, Scene, SceneKey,
+                                     makeNarrativeGraph)
+import           PrintParams        (allColumnWidth, allDelimiters)
+import           PrintUtils         (printHelp, printIntro)
+import           System.Environment as E (getArgs)
+import           System.IO          (hFlush, stdout)
+import           TextAdventureCore  (adventure)
+import           TextReflow         (reflowPutStr)
+
 import qualified DummyAdventure     as Dummy (allScenes, defaultScene,
                                               gameIntro, startFlags,
                                               startInventory, startScene)
-import           NarrativeGraph     (Flags, Inventory, Scene, SceneKey,
-                                     makeNarrativeGraph)
 import qualified NightmareAdventure as Nightmare (allScenes, defaultScene,
                                                   gameIntro, startFlags,
                                                   startInventory, startScene)
-import           PrintUtils         (allColumnWidth, allDelimiters, printHelp,
-                                     printIntro)
-import           TextAdventureCore  (adventure)
-import           TextReflow         (reflowPutStr)
 
 main :: IO ()
 main =

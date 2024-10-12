@@ -31,6 +31,7 @@ library
       NaturalLanguageLexer
       NaturalLanguageParser
       NightmareAdventure
+      PrintParams
       PrintUtils
       TextAdventureCore
       TextReflow

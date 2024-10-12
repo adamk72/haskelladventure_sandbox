@@ -7,8 +7,8 @@ import           NarrativeGraph        (Flags, Inventory, NarrativeGraph,
                                         printInvalidInteractions,
                                         printSceneDescription)
 import           NaturalLanguageParser (Sentence)
-import           PrintUtils            (allColumnWidth, allDelimiters,
-                                        parseInput)
+import           PrintParams           (allColumnWidth, allDelimiters)
+import           PrintUtils            (parseInput)
 import           TextReflow            (reflowPutStr)
 
 doAdventureLoop :: NarrativeGraph -> SceneKey -> Inventory -> Flags -> Maybe [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
@@ -28,11 +28,11 @@ updateAdventure narrativeGraph (Just (sceneKey, inventory, flags))
       (\state -> putStr "\n" >> hFlush stdout >> return state) >>=
       doAdventureLoop narrativeGraph sceneKey inventory flags
 
-adventure :: NarrativeGraph -> 
+adventure :: NarrativeGraph ->
              Maybe (SceneKey, Inventory, Flags) ->
              IO (Maybe (SceneKey, Inventory, Flags))
 adventure _ Nothing = reflowPutStr allDelimiters allColumnWidth "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
-adventure 
+adventure
   narrativeGraph (Just (sceneKey, inventory, flags)) =
     printSceneDescription
       allDelimiters
