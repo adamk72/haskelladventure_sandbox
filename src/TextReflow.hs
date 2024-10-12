@@ -12,6 +12,7 @@ module TextReflow (joinStrings,
 
 import qualified Data.List.Split as D
 import           Prelude         hiding (lines, words)
+import PrintParams (allDelimiters, allColumnWidth)
 
 joinStrings :: String -> [String] -> String
 joinStrings _ [] = ""
@@ -41,13 +42,15 @@ intercalateNewlines (line1 : line2 : linesRemaining)
     | not (null line2) && head line2 == '\n' = line1 ++ line2 ++ intercalateNewlines linesRemaining --If the next line is a delimiter, just concatenate the lines
     | otherwise = line1 ++ "\n" ++ intercalateNewlines (line2 : linesRemaining) --If the next line is not a delimiter, add one
 
-reflowPutStr :: String -> Int -> String -> IO ()
-reflowPutStr delimiters columnWidth line
+reflowPutStrAux :: String -> Int -> String -> IO ()
+reflowPutStrAux delimiters columnWidth line
     = putStr (intercalateNewlines (reflowLines delimiters columnWidth lines))
         where lines = D.split (D.keepDelimsR $ D.oneOf "\n") line --Split into lines keeping existing newlines
+reflowPutStr :: String -> IO ()
+reflowPutStr = reflowPutStrAux allDelimiters allColumnWidth
 
-reflowPutStrs :: String -> Int -> [String] -> IO ()
-reflowPutStrs delimiters columnWidth lines = reflowPutStr delimiters columnWidth (concat lines)
+reflowPutStrs :: [String] -> IO ()
+reflowPutStrs lines = reflowPutStr (concat lines)
 
 reflowString :: String -> Int -> String -> [String]
 reflowString delimiters columnWidth string

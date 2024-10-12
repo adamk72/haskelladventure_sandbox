@@ -7,7 +7,6 @@ import           CmdOptions         (parse)
 import           Data.Map           (Map)
 import           NarrativeGraph     (Flags, Inventory, Scene, SceneKey,
                                      makeNarrativeGraph)
-import           PrintParams        (allColumnWidth, allDelimiters)
 import           PrintUtils         (printHelp, printIntro)
 import           System.Environment as E (getArgs)
 import           System.IO          (hFlush, stdout)
@@ -59,7 +58,7 @@ runGame :: String ->
     IO ()
 runGame gameIntro defaultScene startScene startInventory startFlags allScenes =
     printIntro >>
-    reflowPutStr allDelimiters allColumnWidth gameIntro >>
+    reflowPutStr gameIntro >>
     putStr "\n" >>
     printHelp >>
     putStr "\n\n\n" >>

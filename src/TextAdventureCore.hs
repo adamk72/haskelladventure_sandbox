@@ -7,14 +7,13 @@ import           NarrativeGraph        (Flags, Inventory, NarrativeGraph,
                                         printInvalidInteractions,
                                         printSceneDescription)
 import           NaturalLanguageParser (Sentence)
-import           PrintParams           (allColumnWidth, allDelimiters)
 import           PrintUtils            (parseInput)
 import           TextReflow            (reflowPutStr)
 
 doAdventureLoop :: NarrativeGraph -> SceneKey -> Inventory -> Flags -> Maybe [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
 doAdventureLoop _ _ _ _ Nothing = return Nothing -- End state of the game
 doAdventureLoop narrativeGraph sceneKey inventory flags (Just []) = adventure narrativeGraph (Just (sceneKey, inventory, flags)) --Failed to parse any sentences
-doAdventureLoop narrativeGraph sceneKey inventory flags (Just sentences) = performInteraction allDelimiters allColumnWidth narrativeGraph sceneKey inventory flags sentences >>=
+doAdventureLoop narrativeGraph sceneKey inventory flags (Just sentences) = performInteraction narrativeGraph sceneKey inventory flags sentences >>=
     adventure narrativeGraph --Perform the adventure loop
 
 updateAdventure :: NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
@@ -31,12 +30,10 @@ updateAdventure narrativeGraph (Just (sceneKey, inventory, flags))
 adventure :: NarrativeGraph ->
              Maybe (SceneKey, Inventory, Flags) ->
              IO (Maybe (SceneKey, Inventory, Flags))
-adventure _ Nothing = reflowPutStr allDelimiters allColumnWidth "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
+adventure _ Nothing = reflowPutStr "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
 adventure
   narrativeGraph (Just (sceneKey, inventory, flags)) =
     printSceneDescription
-      allDelimiters
-      allColumnWidth
       narrativeGraph
       (Just (sceneKey, inventory, flags)) >>=
       updateAdventure narrativeGraph

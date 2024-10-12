@@ -7,7 +7,7 @@ import           System.IO             (hFlush, stdout)
 import           NarrativeGraph        (Flags (..), Inventory (..))
 import           NaturalLanguageLexer  (Token (..), TokenMatch (..), lexInput)
 import           NaturalLanguageParser (Sentence, parseSentence)
-import           PrintParams           (allColumnWidth, allDelimiters)
+import           PrintParams           (allDelimiters)
 import           TextReflow            (reflowPutStr, reflowPutStrs)
 
 import qualified Data.Char
@@ -35,18 +35,13 @@ printSentences (sentence : sentences) = print sentence >> printSentences sentenc
 --Print intro
 printIntro :: IO ()
 printIntro
-    = reflowPutStrs allDelimiters
-                    allColumnWidth
-                    ["Haskell Text Adventure Engine v1.0\n",
-                     "Copyright Laurence Emms 2018\n"] >>
+    = reflowPutStrs ["Haskell Text Adventure Engine v1.0\n", "Copyright Laurence Emms 2018\n"] >>
       hFlush stdout
 
 --Print help text
 printHelp :: IO ()
 printHelp
-    = reflowPutStrs allDelimiters
-                    allColumnWidth
-                    ("The following commands are available:\n" :
+    = reflowPutStrs ("The following commands are available:\n" :
                     fmap (\t -> "\t> "++t++"\n")
                         ["Inventory - Print all current inventory items.",
                         "Help - Print help text.",
@@ -63,9 +58,7 @@ printHelp
 
 printGrammar :: IO ()
 printGrammar
-    = reflowPutStrs allDelimiters
-                    allColumnWidth
-                    ["Simple sentence: <Verb> <Noun>\n",
+    = reflowPutStrs ["Simple sentence: <Verb> <Noun>\n",
                      "Simple preposition sentence: <Verb> <Preposition> <Noun>\n",
                      "Complex sentence: <Verb> <Noun> <Preposition> <Noun>\n",
                      "Complex preposition sentence: <Verb> <Preposition> <Noun> <Preposition> <Noun>\n"] >>
@@ -74,58 +67,42 @@ printGrammar
 printVerbs :: [Token] -> IO ()
 printVerbs [] = putStr "\n" >> hFlush stdout
 printVerbs ((TokenVerb name synonyms) : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
+    = reflowPutStr ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printVerbs tokens >>
       hFlush stdout
 printVerbs (_ : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   "Invalid token\n" >>
+    = reflowPutStr "Invalid token\n" >>
       printVerbs tokens >>
       hFlush stdout
 
 printNouns :: [Token] -> IO ()
 printNouns [] = putStr "\n" >> hFlush stdout
 printNouns ((TokenNoun name synonyms) : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
+    = reflowPutStr ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printNouns tokens >> hFlush stdout
 printNouns (_ : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   "Invalid token\n" >>
+    = reflowPutStr "Invalid token\n" >>
       printNouns tokens >> hFlush stdout
 
 printPrepositions :: [Token] -> IO ()
 printPrepositions [] = putStr "\n" >> hFlush stdout
 printPrepositions ((TokenPreposition name synonyms) : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
+    = reflowPutStr ("Synonyms for " ++ name ++ ": " ++ show synonyms ++ "\n") >>
       printPrepositions tokens >> hFlush stdout
 printPrepositions (_ : tokens)
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   "Invalid token\n" >>
+    = reflowPutStr "Invalid token\n" >>
       printPrepositions tokens >> hFlush stdout
 
 printInventory :: Inventory -> IO ()
 printInventory (Inventory []) = putStr "\n" >> hFlush stdout
 printInventory (Inventory (object : remainingInventory))
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   (object ++ "\n") >>
+    = reflowPutStr (object ++ "\n") >>
       printInventory (Inventory remainingInventory) >> hFlush stdout
 
 printFlags :: Flags -> IO ()
 printFlags (Flags []) = putStr "\n" >> hFlush stdout
 printFlags (Flags (flag : remainingFlags))
-    = reflowPutStr allDelimiters
-                   allColumnWidth
-                   (flag ++ ".\n") >>
+    = reflowPutStr (flag ++ ".\n") >>
       printFlags (Flags remainingFlags) >> hFlush stdout
 
 parseInput :: Inventory -> Flags -> String -> IO (Maybe [Sentence])
