@@ -11,17 +11,16 @@
 
 
 import           CmdOptions           as Cmd (parse)
-import           Control.Monad        (void)
-import           Data.Aeson
+import           Data.Aeson           (FromJSON, ToJSON, eitherDecode)
 import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
-import           Data.Text            as T (Text, concat, unpack, intercalate)
+import           Data.Text            as T (Text, concat, intercalate, unpack)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 allTokens, allVerbs,
                                                 defaultScene, gameIntro,
                                                 startFlags, startInventory,
                                                 startScene)
-import           GHC.Generics
+import           GHC.Generics         (Generic)
 import           NarrativeGraph       (Flags, Inventory, Scene, SceneKey,
                                        makeNarrativeGraph)
 import           NaturalLanguageLexer (Prepositions, Tokens, Verbs)
@@ -35,27 +34,21 @@ import           System.Environment   as E (getArgs)
 import           System.IO            (hFlush, stdout)
 import           TextAdventureCore    (adventure)
 import           TextReflow           (reflowPutStr)
-import Data.List (intercalate)
-import Data.List (intersperse)
 
-data Person =
-  Person { firstName  :: !T.Text
-         , lastName   :: !T.Text
-         , age        :: Int
-         , likesPizza :: Bool
-           } deriving (Show,Generic)
+data AdventureDetail =
+  AdventureDetail { fullName    :: !T.Text
+                  , shortName   :: !T.Text
+                  , description :: !T.Text
+                  } deriving (Show,Generic)
 
-instance FromJSON Person
-instance ToJSON Person
+instance FromJSON AdventureDetail
+instance ToJSON AdventureDetail
 
 jsonFile :: FilePath
-jsonFile = "stories/pizza.json"
+jsonFile = "stories/adventures.json"
 
 getJSON :: IO B.ByteString
 getJSON = B.readFile jsonFile
-
-getStories :: IO String
-getStories = readFile "stories.txt"
 
 main :: IO ()
 main =
@@ -69,11 +62,10 @@ main =
 
 displayHelp :: IO ()
 displayHelp =
-  (eitherDecode <$> getJSON) >>= \d ->
-  case d of
+  (eitherDecode <$> getJSON) >>= \case
     Left err -> putStrLn err
     Right ps ->
-      let names = T.unpack $ T.intercalate "\n" (map (\p -> T.concat [firstName p, " ", lastName p]) ps)
+      let names = T.unpack $ T.intercalate "\n" (map (\p -> T.concat [fullName p, " (", shortName p, ") -- ", description p]) ps)
       in Cmd.parse names >> return ()
 
 runDummy :: IO ()

@@ -1,8 +1,0 @@
----
-stories:
-  - dummy-adventure:
-    name: "Dummy adventure"
-    description: "Sample story with quick resolution."
-  - nightmare-adventure:
-    name: "Nightmare Adventure"
-    description: "A harrowing story that might cause nightmares!"
