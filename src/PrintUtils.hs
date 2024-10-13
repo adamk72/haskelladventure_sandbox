@@ -7,7 +7,9 @@ import           System.IO             (hFlush, stdout)
 import qualified Data.Char
 import qualified Data.List.Split
 import           NarrativeGraph        (Flags (..), Inventory (..))
-import           NaturalLanguageLexer  (Token (..), TokenMatch (..), lexInput)
+import           NaturalLanguageLexer  (Prepositions, Token (..),
+                                        TokenMatch (..), Tokens, Verbs,
+                                        lexInput)
 import           NaturalLanguageParser (Sentence, parseSentence)
 import           PrintParams           (allDelimiters)
 import           TextReflow            (reflowPutStr, reflowPutStrs)
@@ -103,7 +105,7 @@ printFlags (Flags (flag : remainingFlags))
     = reflowPutStr (flag ++ ".\n") >>
       printFlags (Flags remainingFlags) >> hFlush stdout
 
-parseInput :: [Token] -> [Token] -> [Token] -> Inventory -> Flags -> String -> IO (Maybe [Sentence])
+parseInput :: Verbs -> Prepositions -> Tokens -> Inventory -> Flags -> String -> IO (Maybe [Sentence])
 parseInput verbs prepositions tokens inventory flags line
     | isCmd line "help" = printHelp >> return (Just [])
     | isCmd line "grammar" = putStrLn "All grammar:" >> printGrammar >> return (Just [])

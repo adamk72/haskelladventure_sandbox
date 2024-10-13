@@ -10,7 +10,7 @@ module NaturalLanguageParser (Sentence(..),
                               parseSentence) where
 
 import           Data.List            (find)
-import           NaturalLanguageLexer (Token (..), TokenMatch (..))
+import           NaturalLanguageLexer (Token (..), TokenMatch (..), Verbs, Prepositions, Tokens)
 
 data Sentence = NullSentence | --Exists for completeness
                 Phrase Token |
@@ -53,7 +53,7 @@ makeUnambiguousSentence [verb, preposition0, noun0, preposition1, noun1]
 makeUnambiguousSentence _
     = NullSentence
 
-unambiguousSentence :: [Token] -> [Token] -> [Token] -> [String] -> Sentence
+unambiguousSentence :: Verbs -> Prepositions -> Tokens -> [String] -> Sentence
 unambiguousSentence verbsList nounsList prepositionsList []
     = NullSentence
 unambiguousSentence verbsList nounsList prepositionsList [verb]

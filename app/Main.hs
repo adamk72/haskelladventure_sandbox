@@ -18,7 +18,7 @@ import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 defaultScene, gameIntro,
                                                 startFlags, startInventory,
                                                 startScene)
-import           NaturalLanguageLexer (Token)
+import           NaturalLanguageLexer (Prepositions, Tokens, Verbs)
 import qualified NightmareAdventure   as Nightmare (allPrepositions, allScenes,
                                                     allTokens, allVerbs,
                                                     defaultScene, gameIntro,
@@ -60,7 +60,7 @@ runNightmare = runGame Nightmare.allVerbs
                        Nightmare.startFlags
                        Nightmare.allScenes
 
-runGame :: [Token] -> [Token] -> [Token] -> String ->
+runGame :: Verbs -> Prepositions -> Tokens -> String ->
     NarrativeGraph.Scene ->
     String ->
     NarrativeGraph.Inventory ->

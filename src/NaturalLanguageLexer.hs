@@ -7,13 +7,18 @@
 module NaturalLanguageLexer (Token(..),
                              TokenMatch(..),
                              join,
-                             lexInput) where
+                             lexInput, Verbs, Nouns, Prepositions, Tokens) where
 
 import qualified Data.Char
 
 data Token = TokenVerb String [String] |
              TokenNoun  String [String] |
              TokenPreposition  String [String] deriving (Show, Eq)
+
+type Verbs = [Token]
+type Nouns = [Token]
+type Prepositions = [Token]
+type Tokens = [Token]
 
 --Stores the result when a string matches one or more tokens
 data TokenMatch = TokenMatch String [Token] deriving (Show, Eq)
