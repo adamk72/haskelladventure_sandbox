@@ -15,3 +15,6 @@
 - [x] Clean up where Dummy and Nightmare will probably clash.
 - [x] Basic: Have it pickup on ":q", so I can stop getting snagged when I type ":q" every time I try to exit.
 - [] Advanced: Create a ":" prepended meta-vocabulary (not sure it's needed at this point)
+- [] Convert Adventures to JSON files for ingestion.
+  - [] Get aeson lib working by pulling in tiles to help commands from JSON files.
+  - [] Start with list of verbs/nouns and such since they are generic, and have them added to the existing code base as an input.
