@@ -4,14 +4,18 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use lambda-case" #-}
+{-# HLINT ignore "Redundant <$>" #-}
+{-# HLINT ignore "Use void" #-}
 
 
 import           CmdOptions           as Cmd (parse)
-import           Control.Monad        ()
+import           Control.Monad        (void)
 import           Data.Aeson
 import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
-import           Data.Text            as T (Text, concat)
+import           Data.Text            as T (Text, concat, unpack, intercalate)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 allTokens, allVerbs,
                                                 defaultScene, gameIntro,
@@ -31,6 +35,8 @@ import           System.Environment   as E (getArgs)
 import           System.IO            (hFlush, stdout)
 import           TextAdventureCore    (adventure)
 import           TextReflow           (reflowPutStr)
+import Data.List (intercalate)
+import Data.List (intersperse)
 
 data Person =
   Person { firstName  :: !T.Text
@@ -62,12 +68,13 @@ main =
         _                               -> displayHelp
 
 displayHelp :: IO ()
--- displayHelp = getStories >>= Cmd.parse >>= mempty
-displayHelp = do
- d <- (eitherDecode <$> getJSON) :: IO (Either String [Person])
- case d of
-  Left err -> putStrLn err
-  Right ps -> print (map (\p -> T.concat [firstName p, " ", lastName p]) ps)
+displayHelp =
+  (eitherDecode <$> getJSON) >>= \d ->
+  case d of
+    Left err -> putStrLn err
+    Right ps ->
+      let names = T.unpack $ T.intercalate "\n" (map (\p -> T.concat [firstName p, " ", lastName p]) ps)
+      in Cmd.parse names >> return ()
 
 runDummy :: IO ()
 runDummy = runGame Dummy.allVerbs
