@@ -63,9 +63,12 @@ executable TextAdventure-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       TextAdventure
+    , aeson
     , ansi-terminal
     , base >=4.7 && <5
+    , bytestring
     , containers
+    , text
   default-language: Haskell2010
 
 test-suite TextAdventure-test

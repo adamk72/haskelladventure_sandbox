@@ -46,6 +46,9 @@ packages:
 #
 # extra-deps: []
 
+extra-deps:
+- bytestring-encoding-0.1.2.0
+
 # Override default flag values for project packages and extra-deps
 # flags: {}
 
