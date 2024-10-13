@@ -9,31 +9,31 @@ import           NarrativeGraph        (Flags, Inventory, NarrativeGraph,
 import           NaturalLanguageParser (Sentence)
 import           PrintUtils            (parseInput)
 import           TextReflow            (reflowPutStr)
+import NaturalLanguageLexer
 
-doAdventureLoop :: NarrativeGraph -> SceneKey -> Inventory -> Flags -> Maybe [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
-doAdventureLoop _ _ _ _ Nothing = return Nothing -- End state of the game
-doAdventureLoop narrativeGraph sceneKey inventory flags (Just []) = adventure narrativeGraph (Just (sceneKey, inventory, flags)) --Failed to parse any sentences
-doAdventureLoop narrativeGraph sceneKey inventory flags (Just sentences) = performInteraction narrativeGraph sceneKey inventory flags sentences >>=
-    adventure narrativeGraph --Perform the adventure loop
+doAdventureLoop :: [Token] -> [Token] -> [Token] -> NarrativeGraph -> SceneKey -> Inventory -> Flags -> Maybe [Sentence] -> IO (Maybe (SceneKey, Inventory, Flags))
+doAdventureLoop _ _ _ _ _ _ _ Nothing = return Nothing -- End state of the game
+doAdventureLoop verbs prepositions tokens narrativeGraph sceneKey inventory flags (Just []) = adventure verbs prepositions tokens narrativeGraph (Just (sceneKey, inventory, flags)) --Failed to parse any sentences
+doAdventureLoop verbs prepositions tokens narrativeGraph sceneKey inventory flags (Just sentences) = performInteraction narrativeGraph sceneKey inventory flags sentences >>=
+    adventure verbs prepositions tokens narrativeGraph --Perform the adventure loop
 
-updateAdventure :: NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
-updateAdventure _ Nothing = return Nothing
-updateAdventure narrativeGraph (Just (sceneKey, inventory, flags))
+updateAdventure :: [Token] -> [Token] -> [Token] -> NarrativeGraph -> Maybe (SceneKey, Inventory, Flags) -> IO (Maybe (SceneKey, Inventory, Flags))
+updateAdventure _ _ _ _ Nothing = return Nothing
+updateAdventure verbs prepositions tokens narrativeGraph (Just (sceneKey, inventory, flags))
     = putStr "\n> " >>
       hFlush stdout >>
       printInvalidInteractions narrativeGraph sceneKey >>
       getLine >>=
-      parseInput inventory flags >>=
+      parseInput verbs prepositions tokens inventory flags >>=
       (\state -> putStr "\n" >> hFlush stdout >> return state) >>=
-      doAdventureLoop narrativeGraph sceneKey inventory flags
+      doAdventureLoop verbs prepositions tokens narrativeGraph sceneKey inventory flags
 
-adventure :: NarrativeGraph ->
+adventure :: [Token] -> [Token] -> [Token] -> NarrativeGraph ->
              Maybe (SceneKey, Inventory, Flags) ->
              IO (Maybe (SceneKey, Inventory, Flags))
-adventure _ Nothing = reflowPutStr "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
-adventure
-  narrativeGraph (Just (sceneKey, inventory, flags)) =
+adventure _ _ _ _ Nothing = reflowPutStr "Game over. Thanks for playing!" >> hFlush stdout >> return Nothing
+adventure verbs prepositions tokens narrativeGraph (Just (sceneKey, inventory, flags)) =
     printSceneDescription
       narrativeGraph
       (Just (sceneKey, inventory, flags)) >>=
-      updateAdventure narrativeGraph
+      updateAdventure verbs prepositions tokens narrativeGraph

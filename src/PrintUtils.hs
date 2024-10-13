@@ -12,7 +12,6 @@ import           NaturalLanguageParser (Sentence, parseSentence)
 import           PrintParams           (allDelimiters)
 import           TextReflow            (reflowPutStr, reflowPutStrs)
 
-import           DummyAdventure        (allPrepositions, allTokens, allVerbs)
 
 printTokens :: String -> [Token] -> IO ()
 printTokens word [] = putStr "\n" >> hFlush stdout
@@ -120,6 +119,6 @@ parseInput verbs prepositions tokens inventory flags line
                   hFlush stdout >>
                   return (Just sentences)
         where inputWords = Data.List.Split.splitOneOf allDelimiters line
-              sentenceTokenMatches = lexInput allTokens inputWords
+              sentenceTokenMatches = lexInput tokens inputWords
               sentences = parseSentence sentenceTokenMatches
               isCmd a b = map Data.Char.toLower a == b
