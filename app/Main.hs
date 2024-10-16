@@ -30,6 +30,7 @@ import qualified NightmareAdventure   as Nightmare (allPrepositions, allScenes,
                                                     startFlags, startInventory,
                                                     startScene)
 import           PrintUtils           (printHelp, printIntro)
+import           System.Directory
 import           System.Environment   as E (getArgs)
 import           System.IO            (hFlush, stdout)
 import           TextAdventureCore    (adventure)
@@ -47,18 +48,24 @@ instance ToJSON AdventureDetail
 jsonFile :: FilePath
 jsonFile = "stories/adventures.json"
 
+storyDirectory :: FilePath
+storyDirectory = "stories"
+
+
 getJSON :: IO B.ByteString
 getJSON = B.readFile jsonFile
 
 main :: IO ()
 main =
     -- E.getArgs >>= print >>
-    E.getArgs >>= \case
-        ["-a", "Dummy Adventure"]       -> runDummy
-        ["-a", "Dummy"]                 -> runDummy
-        ["-a", "Nightmare Adventure"]   -> runNightmare
-        ["-a", "Nightmare"]             -> runNightmare
-        _                               -> displayHelp
+    --FilePath -> IO [FilePath] >>= m [String]
+    listDirectory storyDirectory >>= mapM_ putStrLn
+    -- E.getArgs >>= \case
+    --     ["-a", "Dummy Adventure"]       -> runDummy
+    --     ["-a", "Dummy"]                 -> runDummy
+    --     ["-a", "Nightmare Adventure"]   -> runNightmare
+    --     ["-a", "Nightmare"]             -> runNightmare
+    --     _                               -> displayHelp
 
 displayHelp :: IO ()
 displayHelp =

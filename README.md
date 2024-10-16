@@ -7,6 +7,12 @@
 
 ## Todos
 
+### Doc/Blog Todos
+
+- [] Go over `mapM` and `mapM_` in context of reading from a file directory and printing out the file names: `listDirectory storyDirectory >>= mapM_ putStrLn`. See Listing 22.3 in the GPWH book.
+
+### Coding Todos
+
 - [x] Pull list of adventures from a text file and initially display on screen.
 - [x] Update help text with list of adventures so that --help shows them.
 - [x] Allow user to input one of those adventure as a command line argument and then display content from a second file associated with that name.

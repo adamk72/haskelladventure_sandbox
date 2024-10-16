@@ -58,6 +58,7 @@ executables:
     - ansi-terminal
     - bytestring
     - containers
+    - directory
     - text
 
 
