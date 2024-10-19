@@ -16,9 +16,10 @@ import           Data.Aeson           (FromJSON, Result (..), ToJSON,
                                        Value (..), decode, eitherDecode,
                                        fromJSON, (.:))
 import           Data.Aeson.Types     (Parser, parseMaybe)
+import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
-import           Data.Text            as T (Text, concat, intercalate, unpack)
+import           Data.Text            as T (Text, concat, intercalate, unpack, pack)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 allTokens, allVerbs,
                                                 defaultScene, gameIntro,
@@ -56,14 +57,15 @@ jsonFile = "stories/DummyAdventure.json"
 storyDirectory :: FilePath
 storyDirectory = "stories"
 
-
 getJSON :: IO B.ByteString
 getJSON = B.readFile jsonFile
 
+
 main :: IO ()
-main = runMainTest
+main =
+    runMainTest
     -- E.getArgs >>= print >>
-    --FilePath -> IO [FilePath] >>= m [String]
+    -- FilePath -> IO [FilePath] >>= m [String]
     -- listDirectory storyDirectory >>= mapM_ print >>
     -- E.getArgs >>= \case
     --     ["-a", "Dummy Adventure"]       -> runDummy
@@ -72,27 +74,40 @@ main = runMainTest
     --     ["-a", "Nightmare"]             -> runNightmare
     --     _                               -> displayHelp
 
+
+getJsonFilePaths :: FilePath -> IO [FilePath]
+getJsonFilePaths dir = do
+    allFiles <- listDirectory dir
+    let jsonFiles = filter (\f -> takeExtension f == ".json") allFiles
+    return $ map (dir </>) jsonFiles
+
+readJsonFile :: FilePath -> IO (Maybe AdventureDetail)
+readJsonFile filePath = do
+    contents <- B.readFile filePath
+    return $ decode contents
+
+processJsonFiles :: [FilePath] -> IO [(FilePath, Maybe (T.Text, T.Text))]
+processJsonFiles = mapM processFile
+  where
+    processFile file = do
+      mAdventure <- readJsonFile file
+      return (file, extractNames mAdventure)
+
+    extractNames (Just adv) = Just (fullName adv, shortName adv)
+    extractNames Nothing = Nothing
+
+
 runMainTest :: IO ()
 runMainTest = do
-    files <- listDirectory storyDirectory
-    let jsonFiles = filter (\f -> takeExtension f == ".json") files
+    jsonPaths <- getJsonFilePaths storyDirectory
+    results <- processJsonFiles jsonPaths
+    mapM_ printResult results
+        where
+            printResult (file, Just (first, last)) =
+                TIO.putStrLn $ T.concat ["File: ", T.pack file, ", Name: ", first, " ", last]
+            printResult (file, Nothing) =
+                TIO.putStrLn $ T.concat ["File: ", T.pack file, ", Failed to parse or extract names"]
 
-    putStrLn "Titles from JSON files:"
-    forM_ jsonFiles $ \file -> do
-        let fullPath = storyDirectory </> file
-        content <- B.readFile fullPath
-        case decode content of
-            Nothing -> putStrLn $ "Error parsing JSON in file: " ++ file
-            Just json -> case extractTitle json of
-                Nothing    -> putStrLn $ "No title found in file: " ++ file
-                Just title -> putStrLn $ "- " ++ unpack title
-
-extractTitle :: Value -> Maybe Text
-extractTitle = parseMaybe parseTitle
-
-parseTitle :: Value -> Parser Text
-parseTitle (Object v) = v .: "fullName"
-parseTitle _          = fail "Expected an object"
 
 
 displayHelp :: IO ()
