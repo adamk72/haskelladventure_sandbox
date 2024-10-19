@@ -1,7 +1,5 @@
-[
-  {
-    "fullName": "Dummy Adventure",
-    "shortName": "Dummy",
-    "description": "Sample story with quick resolution."
-  }
-]
+ {
+   "fullName": "Dummy Adventure",
+   "shortName": "Dummy",
+   "description": "Sample story with quick resolution."
+ }

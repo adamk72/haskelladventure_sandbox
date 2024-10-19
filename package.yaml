@@ -55,7 +55,7 @@ executables:
     dependencies:
     - TextAdventure
     - aeson
-    - ansi-terminal
+    - filepath
     - bytestring
     - containers
     - directory
