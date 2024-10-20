@@ -14,7 +14,7 @@ import           Control.Monad        (void)
 import           Data.Aeson           (FromJSON, ToJSON, decode)
 import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
-import           Data.Text            as T (Text, concat, pack, unpack)
+import           Data.Text            as T (Text, concat, unpack)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 allTokens, allVerbs,
                                                 defaultScene, gameIntro,
@@ -61,11 +61,10 @@ main =
         ["-a", "Nightmare"]             -> runNightmare
         _                               -> displayHelp  (foldMap concatResults results)
         where
-            concatResults (file, Just (_first, _last)) =
-                T.concat ["File: ", T.pack file, ", Name: ", _first, " ", _last]
-            concatResults (file, Nothing) =
-                T.concat ["File: ", T.pack file, ", Failed to parse or extract names"]
-
+            concatResults (Just (full, short, desc)) =
+                T.concat [full, " (", short, ") -", desc, "\n"]
+            concatResults Nothing =
+                T.concat ["Failed to parse or extract names"]
 
 displayHelp :: Text -> IO ()
 displayHelp t = void $ Cmd.parse $ T.unpack t
@@ -81,14 +80,14 @@ readJsonFile filePath = do
     contents <- B.readFile filePath
     return $ decode contents
 
-processJsonFiles :: [FilePath] -> IO [(FilePath, Maybe (T.Text, T.Text))]
+processJsonFiles :: [FilePath] -> IO [Maybe (T.Text, T.Text, T.Text)]
 processJsonFiles = mapM processFile
   where
     processFile file = do
       mAdventure <- readJsonFile file
-      return (file, extractNames mAdventure)
+      return (extractNames mAdventure)
 
-    extractNames (Just adv) = Just (fullName adv, shortName adv)
+    extractNames (Just adv) = Just (fullName adv, shortName adv, description adv)
     extractNames Nothing    = Nothing
 
 runDummy :: IO ()

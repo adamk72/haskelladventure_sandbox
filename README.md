@@ -23,6 +23,6 @@
 - [] Advanced: Create a ":" prepended meta-vocabulary (not sure it's needed at this point)
 - [] Convert Adventures to JSON files for ingestion.
   - [x] Get aeson lib working by pulling in tiles to help commands from JSON files.
-  - [] Pull json data from _separate_ files (one for D and one for N) and then add to help files.
+  - [x] Pull json data from _separate_ files (one for D and one for N) and then add to help files.
   - [] Start with list of verbs/nouns and such since they are generic, and have them added to the existing code base as an input.
 - [] Super advanced: implement Lenses.
