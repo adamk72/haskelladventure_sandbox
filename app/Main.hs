@@ -1,25 +1,20 @@
 --TextAdventure.hs
 --Copyright Laurence Emms 2018
 --Text adventure executable
+{-# HLINT ignore "Redundant <$>" #-}
+{-# HLINT ignore "Use lambda-case" #-}
+{-# HLINT ignore "Use void" #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use lambda-case" #-}
-{-# HLINT ignore "Redundant <$>" #-}
-{-# HLINT ignore "Use void" #-}
-
 
 import           CmdOptions           as Cmd (parse)
-import           Control.Monad        (forM_)
-import           Data.Aeson           (FromJSON, Result (..), ToJSON,
-                                       Value (..), decode, eitherDecode,
-                                       fromJSON, (.:))
-import           Data.Aeson.Types     (Parser, parseMaybe)
-import qualified Data.Text.IO as TIO
+import           Control.Monad        (void)
+import           Data.Aeson           (FromJSON, ToJSON, decode)
 import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
-import           Data.Text            as T (Text, concat, intercalate, unpack, pack)
+import           Data.Text            as T (Text, concat, pack, unpack)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 allTokens, allVerbs,
                                                 defaultScene, gameIntro,
@@ -51,29 +46,29 @@ data AdventureDetail =
 instance FromJSON AdventureDetail
 instance ToJSON AdventureDetail
 
-jsonFile :: FilePath
-jsonFile = "stories/DummyAdventure.json"
-
 storyDirectory :: FilePath
 storyDirectory = "stories"
 
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
-
-
 main :: IO ()
 main =
-    runMainTest
-    -- E.getArgs >>= print >>
-    -- FilePath -> IO [FilePath] >>= m [String]
-    -- listDirectory storyDirectory >>= mapM_ print >>
-    -- E.getArgs >>= \case
-    --     ["-a", "Dummy Adventure"]       -> runDummy
-    --     ["-a", "Dummy"]                 -> runDummy
-    --     ["-a", "Nightmare Adventure"]   -> runNightmare
-    --     ["-a", "Nightmare"]             -> runNightmare
-    --     _                               -> displayHelp
+    do
+    jsonPaths <- getJsonFilePaths storyDirectory
+    results <- processJsonFiles jsonPaths
+    E.getArgs >>= \case
+        ["-a", "Dummy Adventure"]       -> runDummy
+        ["-a", "Dummy"]                 -> runDummy
+        ["-a", "Nightmare Adventure"]   -> runNightmare
+        ["-a", "Nightmare"]             -> runNightmare
+        _                               -> displayHelp  (foldMap concatResults results)
+        where
+            concatResults (file, Just (_first, _last)) =
+                T.concat ["File: ", T.pack file, ", Name: ", _first, " ", _last]
+            concatResults (file, Nothing) =
+                T.concat ["File: ", T.pack file, ", Failed to parse or extract names"]
 
+
+displayHelp :: Text -> IO ()
+displayHelp t = void $ Cmd.parse $ T.unpack t
 
 getJsonFilePaths :: FilePath -> IO [FilePath]
 getJsonFilePaths dir = do
@@ -94,29 +89,7 @@ processJsonFiles = mapM processFile
       return (file, extractNames mAdventure)
 
     extractNames (Just adv) = Just (fullName adv, shortName adv)
-    extractNames Nothing = Nothing
-
-
-runMainTest :: IO ()
-runMainTest = do
-    jsonPaths <- getJsonFilePaths storyDirectory
-    results <- processJsonFiles jsonPaths
-    mapM_ printResult results
-        where
-            printResult (file, Just (first, last)) =
-                TIO.putStrLn $ T.concat ["File: ", T.pack file, ", Name: ", first, " ", last]
-            printResult (file, Nothing) =
-                TIO.putStrLn $ T.concat ["File: ", T.pack file, ", Failed to parse or extract names"]
-
-
-
-displayHelp :: IO ()
-displayHelp =
-  (eitherDecode <$> getJSON) >>= \case
-    Left err -> putStrLn err
-    Right ps ->
-      let names = T.unpack $ T.intercalate "\n" (map (\p -> T.concat [fullName p, " (", shortName p, ") -- ", description p]) ps)
-      in Cmd.parse names >> return ()
+    extractNames Nothing    = Nothing
 
 runDummy :: IO ()
 runDummy = runGame Dummy.allVerbs
@@ -157,4 +130,3 @@ runGame verbs prepositions tokens gameIntro defaultScene startScene startInvento
     adventure verbs prepositions tokens (makeNarrativeGraph adventureScenes endScenes defaultScene) (Just (startScene, startInventory, startFlags)) >>
     return ()
         where (adventureScenes, endScenes) = allScenes
-
