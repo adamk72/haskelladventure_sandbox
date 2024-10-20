@@ -25,7 +25,6 @@ source-repository head
 
 library
   exposed-modules:
-      CmdOptions
       DummyAdventure
       NarrativeGraph
       NaturalLanguageLexer
@@ -45,9 +44,6 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
-    , optparse-applicative
-    , prettyprinter
-    , prettyprinter-ansi-terminal
     , split
     , text
   default-language: Haskell2010
@@ -55,6 +51,8 @@ library
 executable TextAdventure-exe
   main-is: Main.hs
   other-modules:
+      CmdOptions
+      HelpDetails
       Paths_TextAdventure
   autogen-modules:
       Paths_TextAdventure
@@ -69,6 +67,9 @@ executable TextAdventure-exe
     , containers
     , directory
     , filepath
+    , optparse-applicative
+    , prettyprinter
+    , prettyprinter-ansi-terminal
     , text
   default-language: Haskell2010
 

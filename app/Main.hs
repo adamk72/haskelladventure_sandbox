@@ -1,18 +1,12 @@
 --TextAdventure.hs
 --Copyright Laurence Emms 2018
 --Text adventure executable
-{-# HLINT ignore "Redundant <$>" #-}
-{-# HLINT ignore "Use lambda-case" #-}
-{-# HLINT ignore "Use void" #-}
-{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 import           CmdOptions           as Cmd (parse)
 import           Control.Monad        (void)
-import           Data.Aeson           (FromJSON, ToJSON, decode)
-import qualified Data.ByteString.Lazy as B
 import           Data.Map             (Map)
 import           Data.Text            as T (Text, concat, unpack)
 import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
@@ -20,7 +14,8 @@ import qualified DummyAdventure       as Dummy (allPrepositions, allScenes,
                                                 defaultScene, gameIntro,
                                                 startFlags, startInventory,
                                                 startScene)
-import           GHC.Generics         (Generic)
+import HelpDetails as Help
+    ( storyDirectory, getJsonFilePaths, processJsonFiles )
 import           NarrativeGraph       (Flags, Inventory, Scene, SceneKey,
                                        makeNarrativeGraph)
 import           NaturalLanguageLexer (Prepositions, Tokens, Verbs)
@@ -30,24 +25,10 @@ import qualified NightmareAdventure   as Nightmare (allPrepositions, allScenes,
                                                     startFlags, startInventory,
                                                     startScene)
 import           PrintUtils           (printHelp, printIntro)
-import           System.Directory
 import           System.Environment   as E (getArgs)
-import           System.FilePath      (takeExtension, (</>))
 import           System.IO            (hFlush, stdout)
 import           TextAdventureCore    (adventure)
 import           TextReflow           (reflowPutStr)
-
-data AdventureDetail =
-  AdventureDetail { fullName    :: !T.Text
-                  , shortName   :: !T.Text
-                  , description :: !T.Text
-                  } deriving (Show,Generic)
-
-instance FromJSON AdventureDetail
-instance ToJSON AdventureDetail
-
-storyDirectory :: FilePath
-storyDirectory = "stories"
 
 main :: IO ()
 main =
@@ -66,29 +47,10 @@ main =
             concatResults Nothing =
                 T.concat ["Failed to parse or extract names"]
 
+
+
 displayHelp :: Text -> IO ()
 displayHelp t = void $ Cmd.parse $ T.unpack t
-
-getJsonFilePaths :: FilePath -> IO [FilePath]
-getJsonFilePaths dir = do
-    allFiles <- listDirectory dir
-    let jsonFiles = filter (\f -> takeExtension f == ".json") allFiles
-    return $ map (dir </>) jsonFiles
-
-readJsonFile :: FilePath -> IO (Maybe AdventureDetail)
-readJsonFile filePath = do
-    contents <- B.readFile filePath
-    return $ decode contents
-
-processJsonFiles :: [FilePath] -> IO [Maybe (T.Text, T.Text, T.Text)]
-processJsonFiles = mapM processFile
-  where
-    processFile file = do
-      mAdventure <- readJsonFile file
-      return (extractNames mAdventure)
-
-    extractNames (Just adv) = Just (fullName adv, shortName adv, description adv)
-    extractNames Nothing    = Nothing
 
 runDummy :: IO ()
 runDummy = runGame Dummy.allVerbs

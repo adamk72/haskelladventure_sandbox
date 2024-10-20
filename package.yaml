@@ -22,7 +22,6 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 
-
 ghc-options:
 - -Wall
 - -Wcompat
@@ -40,9 +39,6 @@ library:
   - split
   - containers
   - text
-  - optparse-applicative
-  - prettyprinter
-  - prettyprinter-ansi-terminal
 
 executables:
   TextAdventure-exe:
@@ -55,12 +51,14 @@ executables:
     dependencies:
     - TextAdventure
     - aeson
-    - filepath
     - bytestring
     - containers
     - directory
+    - filepath
+    - optparse-applicative
+    - prettyprinter
+    - prettyprinter-ansi-terminal
     - text
-
 
 tests:
   TextAdventure-test:

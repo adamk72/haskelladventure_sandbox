@@ -26,3 +26,4 @@
   - [x] Pull json data from _separate_ files (one for D and one for N) and then add to help files.
   - [] Start with list of verbs/nouns and such since they are generic, and have them added to the existing code base as an input.
 - [] Super advanced: implement Lenses.
+- [] In Main "launcher" code, remove the redundant use of "runDummy" and "runNightmare"; make it such that it knows what to run from the list it pulls from the story json files.
